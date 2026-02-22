@@ -168,9 +168,9 @@ gltfLoader.load(
 
     // Place trees at these positions (adjust scale if needed)
     const treePositions = [
-      { x: -4, z: -3, scale: 1.0 },
-      { x: -3, z: 3, scale: 0.8 },
-      { x: 4, z: 3, scale: 0.9 },
+      { x: -4, z: -3, scale: 0.15 },
+      { x: -3, z: 3, scale: 0.12 },
+      { x: 4, z: 3, scale: 0.13 },
     ];
 
     treePositions.forEach(t => {
@@ -194,9 +194,9 @@ gltfLoader.load(
   // Error - fallback to primitive trees
   (error) => {
     console.warn('GLB load failed, using fallback trees:', error);
-    mkPine(-4, -3, 0.8);
-    mkPine(-3, 3, 0.7);
-    mkRound(4, 3, 0.7);
+    mkPine(-4, -3, 0.15);
+    mkPine(-3, 3, 0.12);
+    mkRound(4, 3, 0.13);
     loadBar.style.width = '100%';
     setTimeout(() => document.getElementById('loading').classList.add('done'), 300);
   }
