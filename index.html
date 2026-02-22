@@ -30,9 +30,18 @@
   #click-indicator { position: fixed; pointer-events: none; z-index: 5; width: 20px; height: 20px; border: 2px solid rgba(126,205,106,0.6); border-radius: 50%; transform: translate(-50%,-50%) scale(0); opacity: 0; }
   #click-indicator.active { animation: clickRing 0.6s ease-out forwards; }
   @keyframes clickRing { 0%{transform:translate(-50%,-50%) scale(0);opacity:1} 100%{transform:translate(-50%,-50%) scale(2.5);opacity:0} }
+  #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #d4e4d0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.5s; }
+  #loading.done { opacity: 0; pointer-events: none; }
+  #loading-text { color: #4a6a40; font-size: 16px; margin-top: 16px; }
+  #loading-bar-bg { width: 200px; height: 6px; background: rgba(74,106,64,0.2); border-radius: 3px; margin-top: 10px; }
+  #loading-bar { height: 100%; width: 0%; background: #7ecd6a; border-radius: 3px; transition: width 0.3s; }
 </style>
 </head>
 <body>
+<div id="loading">
+  <div id="loading-text">Loading farm... 🌿</div>
+  <div id="loading-bar-bg"><div id="loading-bar"></div></div>
+</div>
 <div id="ui-overlay"><div id="player-badge"><span class="dot"></span><span>ONLINE · <strong>1 Player</strong></span></div></div>
 <div id="controls-hint">
   <div class="hint-pill">🖱 Click ground to move</div>
@@ -50,6 +59,7 @@
 <div id="click-indicator"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xd4e4d0);
@@ -119,7 +129,7 @@ function mkHouse(x,z){
 }
 mkHouse(1,-1);
 
-// Trees
+// Fallback primitive trees (used if GLB fails to load)
 function mkPine(x,z,s){
   const g=new THREE.Group();
   const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.15*s,0.25*s,1.5*s,6),new THREE.MeshLambertMaterial({color:0x8b6848}));
@@ -138,7 +148,59 @@ function mkRound(x,z,s){
   cr.position.y=2.6*s;cr.castShadow=true;g.add(cr);
   g.position.set(x,0,z);scene.add(g);
 }
-mkPine(-4,-3,0.8); mkPine(-3,3,0.7); mkRound(4,3,0.7);
+
+// ============ LOAD GLB TREES FROM GITHUB ============
+const TREE_URL = 'stylized_pine_tree_tree.glb'; // relative path (same folder)
+const loadBar = document.getElementById('loading-bar');
+
+const gltfLoader = new THREE.GLTFLoader();
+gltfLoader.load(
+  TREE_URL,
+  // Success
+  (gltf) => {
+    const treeModel = gltf.scene;
+    treeModel.traverse(child => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+
+    // Place trees at these positions (adjust scale if needed)
+    const treePositions = [
+      { x: -4, z: -3, scale: 1.0 },
+      { x: -3, z: 3, scale: 0.8 },
+      { x: 4, z: 3, scale: 0.9 },
+    ];
+
+    treePositions.forEach(t => {
+      const tree = treeModel.clone();
+      tree.position.set(t.x, 0.15, t.z);
+      tree.scale.setScalar(t.scale);
+      scene.add(tree);
+    });
+
+    console.log('GLB trees loaded successfully!');
+    loadBar.style.width = '100%';
+    setTimeout(() => document.getElementById('loading').classList.add('done'), 300);
+  },
+  // Progress
+  (progress) => {
+    if (progress.total) {
+      const pct = (progress.loaded / progress.total) * 100;
+      loadBar.style.width = pct + '%';
+    }
+  },
+  // Error - fallback to primitive trees
+  (error) => {
+    console.warn('GLB load failed, using fallback trees:', error);
+    mkPine(-4, -3, 0.8);
+    mkPine(-3, 3, 0.7);
+    mkRound(4, 3, 0.7);
+    loadBar.style.width = '100%';
+    setTimeout(() => document.getElementById('loading').classList.add('done'), 300);
+  }
+);
 
 // Flowers
 for(let i=0;i<5;i++){
@@ -197,11 +259,11 @@ ps.rotation.x=-Math.PI/2;ps.position.set(0,0.16,2);scene.add(ps);
 
 // Movement
 let targetPos=new THREE.Vector3(0,0,2),isMoving=false;
-const ray=new THREE.Raycaster(),ms=new THREE.Vector2();
+const ray=new THREE.Raycaster(),mss=new THREE.Vector2();
 renderer.domElement.addEventListener('click',e=>{
   if(isDrag) return;
-  ms.x=(e.clientX/innerWidth)*2-1; ms.y=-(e.clientY/innerHeight)*2+1;
-  ray.setFromCamera(ms,camera);
+  mss.x=(e.clientX/innerWidth)*2-1; mss.y=-(e.clientY/innerHeight)*2+1;
+  ray.setFromCamera(mss,camera);
   const h=ray.intersectObject(ground);
   if(h.length){targetPos.copy(h[0].point);targetPos.y=0;isMoving=true;
     const ind=document.getElementById('click-indicator');
