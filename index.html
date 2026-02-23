@@ -216,7 +216,7 @@ scene.background = new THREE.Color(0xd4e4d0);
 scene.fog = new THREE.FogExp2(0xd4e4d0, 0.012);
 
 const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 200);
-camera.position.set(10, 16, 10);
+camera.position.set(12, 18, 12);
 camera.lookAt(0,0,0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -439,7 +439,7 @@ addEventListener('keydown',e=>{
 renderer.domElement.addEventListener('contextmenu',e=>{e.preventDefault();cancelBuild();});
 
 // ============ MOVEMENT ============
-let targetPos=new THREE.Vector3(0,0,2),isMoving=false;
+let targetPos=new THREE.Vector3(0,0,0),isMoving=false;
 const ray=new THREE.Raycaster(),mss=new THREE.Vector2();
 
 renderer.domElement.addEventListener('click',e=>{
@@ -480,7 +480,7 @@ renderer.domElement.addEventListener('click',e=>{
 });
 
 // ============ CAMERA ============
-let isDrag=false,pmx=0,pmy=0,camA=Math.PI/4,camP=1.0,camD=16;
+let isDrag=false,pmx=0,pmy=0,camA=Math.PI/4,camP=0.9,camD=20;
 renderer.domElement.addEventListener('mousedown',e=>{isDrag=false;pmx=e.clientX;pmy=e.clientY;});
 renderer.domElement.addEventListener('mousemove',e=>{
   if(e.buttons!==1)return;
@@ -489,7 +489,7 @@ renderer.domElement.addEventListener('mousemove',e=>{
   camA-=dx*0.005;camP=Math.max(0.2,Math.min(1.2,camP+dy*0.005));
   pmx=e.clientX;pmy=e.clientY;
 });
-renderer.domElement.addEventListener('wheel',e=>{camD=Math.max(6,Math.min(22,camD+e.deltaY*0.02));});
+renderer.domElement.addEventListener('wheel',e=>{camD=Math.max(6,Math.min(35,camD+e.deltaY*0.02));});
 renderer.domElement.addEventListener('touchstart',e=>{if(e.touches.length===1){pmx=e.touches[0].clientX;pmy=e.touches[0].clientY;isDrag=false;}});
 renderer.domElement.addEventListener('touchmove',e=>{
   if(e.touches.length===1){
@@ -515,13 +515,13 @@ function escapeHTML(s){const d=document.createElement('div');d.textContent=s;ret
 // ============ INIT GAME ============
 function initGame(){
   player=createSheep(localPlayerName,0xf5f0e8);
-  player.position.set(0,0,2);scene.add(player);
+  player.position.set(0,0,0);scene.add(player);
   legs=player.legs;
   playerShadow=player.shadowMesh;
-  playerShadow.position.set(0,0.16,2);scene.add(playerShadow);
+  playerShadow.position.set(0,0.16,0);scene.add(playerShadow);
 
   const playerRef=db.ref('players/'+localPlayerId);
-  playerRef.set({name:localPlayerName,x:0,z:2,rot:0});
+  playerRef.set({name:localPlayerName,x:0,z:0,rot:0});
   playerRef.onDisconnect().remove();
 
   // Players
