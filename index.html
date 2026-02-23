@@ -77,6 +77,7 @@
   }
   .action-btn:hover { background: rgba(55,80,55,0.92); }
   .action-btn.active { border-color: #e85a5a; background: rgba(80,45,45,0.88); }
+  .action-btn.active-select { border-color: #6a9ae8; background: rgba(45,55,80,0.88); }
   .action-btn .key-hint { background: rgba(255,255,255,0.1); padding: 2px 7px; border-radius: 6px; font-size: 11px; font-weight: 400; }
 
   #build-panel {
@@ -120,6 +121,40 @@
     color: #f0c8c8; padding: 8px 18px; border-radius: 20px; font-size: 12px;
     display: none; white-space: nowrap;
   }
+  #select-hint {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); z-index: 15;
+    background: rgba(45,55,80,0.9); backdrop-filter: blur(8px);
+    color: #c8d0f0; padding: 8px 18px; border-radius: 20px; font-size: 12px;
+    display: none; white-space: nowrap;
+  }
+
+  /* Floating edit panel */
+  #float-edit {
+    position: fixed; z-index: 22; display: none;
+    background: rgba(30,45,30,0.95); backdrop-filter: blur(12px);
+    border-radius: 14px; padding: 14px 16px; min-width: 260px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.35); border: 1px solid rgba(126,205,106,0.2);
+  }
+  #float-edit.open { display: block; }
+  #float-edit-title {
+    font-size: 11px; font-weight: 700; color: #f0c06a; letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+  }
+  #float-edit-close {
+    background: rgba(255,255,255,0.08); border: none; color: #c8d8c4; font-size: 14px;
+    width: 22px; height: 22px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  #float-edit-close:hover { background: rgba(255,255,255,0.15); }
+  .fedit-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+  .fedit-row label { color: #c8d8c4; font-size: 10px; font-weight: 500; min-width: 50px; }
+  .fedit-slider { width: 120px; accent-color: #7ecd6a; cursor: pointer; }
+  .fedit-val { color: #7ecd6a; font-size: 10px; font-weight: 600; min-width: 40px; text-align: right; }
+  .fedit-btn {
+    background: rgba(126,205,106,0.15); border: 1px solid rgba(126,205,106,0.3);
+    color: #7ecd6a; padding: 6px 10px; border-radius: 8px; font-size: 11px;
+    font-weight: 600; cursor: pointer; width: 100%; margin-top: 6px;
+  }
+  .fedit-btn:hover { background: rgba(126,205,106,0.25); }
 
   /* ===== ADMIN PANEL ===== */
   #admin-panel {
@@ -248,6 +283,7 @@
   <div id="bottom-buttons">
     <button class="action-btn" id="build-btn">🔨 Build <span class="key-hint">B</span></button>
     <button class="action-btn" id="demolish-btn">🚧 Demolish <span class="key-hint">X</span></button>
+    <button class="action-btn" id="select-btn" style="border-color:rgba(100,140,220,0.4);color:#8ab0e8;">✋ Select <span class="key-hint">V</span></button>
     <button class="action-btn" id="admin-btn" style="border-color:rgba(240,192,106,0.4);color:#f0c06a;">⚙️ Admin</button>
   </div>
   <div id="build-panel">
@@ -264,6 +300,19 @@
   </div>
   <div id="placement-hint">Click ground to place · Right-click or Esc to cancel</div>
   <div id="demolish-hint">Click a placed object to remove it · Right-click or Esc to cancel</div>
+  <div id="select-hint">Click any object to select & edit it · Esc to cancel</div>
+</div>
+
+<!-- Floating edit panel -->
+<div id="float-edit">
+  <div id="float-edit-title"><span id="float-edit-name">Object</span><button id="float-edit-close">&times;</button></div>
+  <div class="fedit-row"><label>Scale</label><input type="range" class="fedit-slider" id="fedit-scale" min="0.001" max="3" value="1" step="0.001"><span class="fedit-val" id="fedit-scale-val">1.000</span></div>
+  <div class="fedit-row"><label>Pos X</label><input type="range" class="fedit-slider" id="fedit-x" min="-20" max="20" value="0" step="0.25"><span class="fedit-val" id="fedit-x-val">0.00</span></div>
+  <div class="fedit-row"><label>Pos Y</label><input type="range" class="fedit-slider" id="fedit-y" min="-2" max="8" value="0" step="0.05"><span class="fedit-val" id="fedit-y-val">0.00</span></div>
+  <div class="fedit-row"><label>Pos Z</label><input type="range" class="fedit-slider" id="fedit-z" min="-20" max="20" value="0" step="0.25"><span class="fedit-val" id="fedit-z-val">0.00</span></div>
+  <div class="fedit-row"><label>Rotate Y</label><input type="range" class="fedit-slider" id="fedit-ry" min="0" max="6.28" value="0" step="0.05"><span class="fedit-val" id="fedit-ry-val">0.00</span></div>
+  <button class="fedit-btn" id="fedit-save">💾 Save to Server</button>
+  <button class="fedit-btn" id="fedit-copy">📋 Copy Values</button>
 </div>
 
 <!-- ===== ADMIN PANEL ===== -->
@@ -527,6 +576,10 @@ function buildHouse(x, z, scale) {
   scene.add(g);
   farmhouse = g;
   farmhouseVisible = true;
+  // Register for select mode (remove old entry first)
+  const idx = defaultObjects.findIndex(o => o.id === 'farmhouse');
+  if (idx > -1) defaultObjects.splice(idx, 1);
+  defaultObjects.push({obj: g, name: 'Farmhouse', id: 'farmhouse'});
 }
 buildHouse(1, -1, 1);
 
@@ -560,20 +613,27 @@ function mkRound(x,z,s){
 const TREE_URL = 'assets/stylized_pine_tree_tree.glb';
 const loadBar = document.getElementById('loading-bar');
 let loadedTreeModel = null;
+const defaultObjects = []; // {obj, name, id} for selectable default objects
 const gltfLoader = new THREE.GLTFLoader();
 gltfLoader.load(TREE_URL,
   (gltf) => {
     const treeModel = gltf.scene;
     treeModel.traverse(child => { if (child.isMesh) { child.castShadow=true; child.receiveShadow=true; }});
     loadedTreeModel = treeModel;
-    [{x:-4,z:-3,scale:0.02},{x:-3,z:3,scale:0.015},{x:4,z:3,scale:0.018}].forEach(t => {
+    [{x:-4,z:-3,scale:0.02,id:'tree0'},{x:-3,z:3,scale:0.015,id:'tree1'},{x:4,z:3,scale:0.018,id:'tree2'}].forEach(t => {
       const tree = treeModel.clone(); tree.position.set(t.x,0.15,t.z); tree.scale.setScalar(t.scale); scene.add(tree);
+      defaultObjects.push({obj:tree, name:'Tree', id:t.id});
     });
     loadBar.style.width='100%';
     setTimeout(()=>document.getElementById('loading').classList.add('done'),300);
   },
   (p)=>{if(p.total)loadBar.style.width=(p.loaded/p.total*100)+'%';},
-  ()=>{mkPine(-4,-3,0.02);mkPine(-3,3,0.015);mkRound(4,3,0.018);loadBar.style.width='100%';setTimeout(()=>document.getElementById('loading').classList.add('done'),300);}
+  ()=>{
+    const t0=mkPine(-4,-3,0.02);defaultObjects.push({obj:t0,name:'Pine',id:'tree0'});
+    const t1=mkPine(-3,3,0.015);defaultObjects.push({obj:t1,name:'Pine',id:'tree1'});
+    const t2=mkRound(4,3,0.018);defaultObjects.push({obj:t2,name:'Round Tree',id:'tree2'});
+    loadBar.style.width='100%';setTimeout(()=>document.getElementById('loading').classList.add('done'),300);
+  }
 );
 
 // Flowers
@@ -644,6 +704,8 @@ const placedObjectsMap = {};
 // ============ BUILD / DEMOLISH ============
 let selectedBuildItem = null;
 let demolishMode = false;
+let selectMode = false;
+let selectedObject = null; // {obj, name, id, fbKey (if placed obj)}
 
 function placeTree(x,z){
   let obj;
@@ -708,11 +770,19 @@ function updateBuildUI(){
   document.getElementById('placement-hint').classList.toggle('visible',selectedBuildItem!==null);
   document.getElementById('demolish-hint').style.display=demolishMode?'block':'none';
   document.getElementById('demolish-btn').classList.toggle('active',demolishMode);
+  document.getElementById('select-hint').style.display=selectMode?'block':'none';
+  const selBtn = document.getElementById('select-btn');
+  selBtn.classList.toggle('active-select',selectMode);
+  selBtn.classList.remove('active');
 }
-function cancelBuild(){selectedBuildItem=null;demolishMode=false;updateBuildUI();}
+function cancelBuild(){selectedBuildItem=null;demolishMode=false;selectMode=false;deselectObject();updateBuildUI();}
 function toggleDemolish(){
   if(demolishMode){cancelBuild();return;}
-  selectedBuildItem=null;buildPanel.classList.remove('open');demolishMode=true;updateBuildUI();
+  selectedBuildItem=null;selectMode=false;deselectObject();buildPanel.classList.remove('open');demolishMode=true;updateBuildUI();
+}
+function toggleSelect(){
+  if(selectMode){cancelBuild();return;}
+  selectedBuildItem=null;demolishMode=false;buildPanel.classList.remove('open');selectMode=true;updateBuildUI();
 }
 
 const buildPanel=document.getElementById('build-panel');
@@ -721,6 +791,7 @@ document.getElementById('build-btn').addEventListener('click',()=>{
   if(!buildPanel.classList.contains('open'))cancelBuild();updateBuildUI();
 });
 document.getElementById('demolish-btn').addEventListener('click',toggleDemolish);
+document.getElementById('select-btn').addEventListener('click',toggleSelect);
 document.getElementById('build-close').addEventListener('click',()=>{buildPanel.classList.remove('open');cancelBuild();});
 document.querySelectorAll('.build-slot').forEach(slot=>{
   slot.addEventListener('click',()=>{selectedBuildItem=slot.dataset.item;demolishMode=false;updateBuildUI();buildPanel.classList.remove('open');});
@@ -729,6 +800,7 @@ addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT')return;
   if(e.key==='b'||e.key==='B'){demolishMode=false;buildPanel.classList.toggle('open');if(!buildPanel.classList.contains('open'))cancelBuild();updateBuildUI();}
   if(e.key==='x'||e.key==='X'){toggleDemolish();}
+  if(e.key==='v'||e.key==='V'){toggleSelect();}
   if(e.key==='Escape'){buildPanel.classList.remove('open');cancelBuild();document.getElementById('admin-panel').classList.remove('open');}
 });
 renderer.domElement.addEventListener('contextmenu',e=>{e.preventDefault();cancelBuild();});
@@ -741,7 +813,30 @@ renderer.domElement.addEventListener('click',e=>{
   if(isDrag)return;
   mss.x=(e.clientX/innerWidth)*2-1;mss.y=-(e.clientY/innerHeight)*2+1;
   ray.setFromCamera(mss,camera);
-  if(demolishMode){
+
+  // Select mode
+  if(selectMode){
+    // Collect all selectable meshes: default objects + placed objects
+    let allSelectables = [];
+    defaultObjects.forEach(entry => {
+      if(entry.obj.isMesh) allSelectables.push({mesh:entry.obj,root:entry.obj,name:entry.name,id:entry.id,fbKey:null});
+      else entry.obj.traverse(child=>{if(child.isMesh)allSelectables.push({mesh:child,root:entry.obj,name:entry.name,id:entry.id,fbKey:null});});
+    });
+    placedObjects.forEach(obj => {
+      let fbKey=null;
+      for(const[k,v]of Object.entries(placedObjectsMap)){if(v===obj){fbKey=k;break;}}
+      if(obj.isMesh) allSelectables.push({mesh:obj,root:obj,name:'Placed',id:fbKey,fbKey});
+      else obj.traverse(child=>{if(child.isMesh)allSelectables.push({mesh:child,root:obj,name:'Placed',id:fbKey,fbKey});});
+    });
+    const hits=ray.intersectObjects(allSelectables.map(m=>m.mesh),false);
+    if(hits.length){
+      const entry=allSelectables.find(m=>m.mesh===hits[0].object);
+      if(entry) selectObject(entry.root,entry.name,entry.id,entry.fbKey,e.clientX,e.clientY);
+    }
+    return;
+  }
+
+  // Demolish mode
     let allMeshes=[];
     placedObjects.forEach(obj=>{
       if(obj.isMesh){allMeshes.push({mesh:obj,root:obj});}
@@ -954,6 +1049,107 @@ function loadMapSettings(data) {
   if(data.fogDensity!==undefined) { scene.fog.density=data.fogDensity; document.getElementById('admin-fog').value=data.fogDensity; document.getElementById('admin-fog-val').textContent=data.fogDensity; }
 }
 
+// ============ SELECT & EDIT SYSTEM ============
+const floatEdit = document.getElementById('float-edit');
+
+function selectObject(obj, name, id, fbKey, screenX, screenY) {
+  deselectObject();
+  selectedObject = {obj, name, id, fbKey};
+
+  // Position floating panel near click
+  const panelX = Math.min(screenX + 20, innerWidth - 290);
+  const panelY = Math.min(screenY - 40, innerHeight - 320);
+  floatEdit.style.left = panelX + 'px';
+  floatEdit.style.top = Math.max(10, panelY) + 'px';
+
+  // Set slider values from object
+  const s = obj.scale.x;
+  document.getElementById('fedit-scale').value = s;
+  document.getElementById('fedit-scale-val').textContent = s.toFixed(3);
+  // Adjust scale slider range based on current scale
+  const scaleSlider = document.getElementById('fedit-scale');
+  if (s > 1) { scaleSlider.max = Math.max(5, s * 2); } else { scaleSlider.max = Math.max(0.5, s * 10); }
+  scaleSlider.min = Math.max(0.001, s * 0.1);
+  scaleSlider.step = s > 0.1 ? 0.01 : 0.001;
+
+  document.getElementById('fedit-x').value = obj.position.x;
+  document.getElementById('fedit-x-val').textContent = obj.position.x.toFixed(2);
+  document.getElementById('fedit-y').value = obj.position.y;
+  document.getElementById('fedit-y-val').textContent = obj.position.y.toFixed(2);
+  document.getElementById('fedit-z').value = obj.position.z;
+  document.getElementById('fedit-z-val').textContent = obj.position.z.toFixed(2);
+  document.getElementById('fedit-ry').value = obj.rotation.y;
+  document.getElementById('fedit-ry-val').textContent = obj.rotation.y.toFixed(2);
+
+  document.getElementById('float-edit-name').textContent = '✋ ' + name + (id ? ' (' + id + ')' : '');
+  floatEdit.classList.add('open');
+}
+
+function deselectObject() {
+  selectedObject = null;
+  floatEdit.classList.remove('open');
+}
+
+document.getElementById('float-edit-close').addEventListener('click', deselectObject);
+
+// Float edit sliders
+['scale','x','y','z','ry'].forEach(key => {
+  const slider = document.getElementById('fedit-' + key);
+  const valSpan = document.getElementById('fedit-' + key + '-val');
+  slider.addEventListener('input', () => {
+    if (!selectedObject) return;
+    const v = parseFloat(slider.value);
+    valSpan.textContent = key === 'scale' ? v.toFixed(3) : v.toFixed(2);
+    const obj = selectedObject.obj;
+    if (key === 'scale') obj.scale.setScalar(v);
+    else if (key === 'x') obj.position.x = v;
+    else if (key === 'y') obj.position.y = v;
+    else if (key === 'z') obj.position.z = v;
+    else if (key === 'ry') obj.rotation.y = v;
+  });
+});
+
+// Save edits to Firebase
+document.getElementById('fedit-save').addEventListener('click', () => {
+  if (!selectedObject) return;
+  const obj = selectedObject.obj;
+  const data = {
+    sx: obj.scale.x, sy: obj.scale.y, sz: obj.scale.z,
+    px: obj.position.x, py: obj.position.y, pz: obj.position.z,
+    ry: obj.rotation.y
+  };
+
+  if (selectedObject.fbKey) {
+    // Placed object — update in objects/
+    db.ref('objects/' + selectedObject.fbKey).update({
+      px: data.px, py: data.py, pz: data.pz,
+      sx: data.sx, ry: data.ry
+    });
+  } else if (selectedObject.id) {
+    // Default object — save in defaultEdits/
+    db.ref('defaultEdits/' + selectedObject.id).set(data);
+  }
+
+  const btn = document.getElementById('fedit-save');
+  btn.textContent = '✅ Saved!';
+  setTimeout(() => btn.textContent = '💾 Save to Server', 1500);
+});
+
+// Copy values
+document.getElementById('fedit-copy').addEventListener('click', () => {
+  if (!selectedObject) return;
+  const obj = selectedObject.obj;
+  const code = `// ${selectedObject.name} (${selectedObject.id || 'placed'})
+model.scale.setScalar(${obj.scale.x.toFixed(4)});
+model.position.set(${obj.position.x.toFixed(2)}, ${obj.position.y.toFixed(2)}, ${obj.position.z.toFixed(2)});
+model.rotation.y = ${obj.rotation.y.toFixed(2)};`;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById('fedit-copy');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy Values', 1500);
+  }).catch(() => {});
+});
+
 // ============ ASSET EDITOR ============
 let previewAsset = null;
 let previewAssetPath = '';
@@ -1134,11 +1330,47 @@ function initGame() {
 
   db.ref('objects').on('child_added', snap => {
     const data=snap.val(),key=snap.key;
-    if(buildFactories[data.type]){const obj=buildFactories[data.type](data.x,data.z);placedObjects.push(obj);placedObjectsMap[key]=obj;}
+    if(buildFactories[data.type]){
+      const obj=buildFactories[data.type](data.x,data.z);
+      // Apply saved edits if any
+      if(data.sx) obj.scale.setScalar(data.sx);
+      if(data.px!==undefined) obj.position.x=data.px;
+      if(data.py!==undefined) obj.position.y=data.py;
+      if(data.pz!==undefined) obj.position.z=data.pz;
+      if(data.ry!==undefined) obj.rotation.y=data.ry;
+      placedObjects.push(obj);placedObjectsMap[key]=obj;
+    }
+  });
+  db.ref('objects').on('child_changed', snap => {
+    const data=snap.val(),key=snap.key;
+    if(placedObjectsMap[key]){
+      const obj=placedObjectsMap[key];
+      if(data.sx) obj.scale.setScalar(data.sx);
+      if(data.px!==undefined) obj.position.x=data.px;
+      if(data.py!==undefined) obj.position.y=data.py;
+      if(data.pz!==undefined) obj.position.z=data.pz;
+      if(data.ry!==undefined) obj.rotation.y=data.ry;
+    }
   });
   db.ref('objects').on('child_removed', snap => {
     const key=snap.key;
     if(placedObjectsMap[key]){scene.remove(placedObjectsMap[key]);const idx=placedObjects.indexOf(placedObjectsMap[key]);if(idx>-1)placedObjects.splice(idx,1);delete placedObjectsMap[key];}
+  });
+
+  // Listen for default object edits (trees, farmhouse)
+  db.ref('defaultEdits').on('value', snap => {
+    const edits = snap.val();
+    if(!edits) return;
+    defaultObjects.forEach(entry => {
+      const edit = edits[entry.id];
+      if(edit){
+        if(edit.sx) entry.obj.scale.set(edit.sx, edit.sy||edit.sx, edit.sz||edit.sx);
+        if(edit.px!==undefined) entry.obj.position.x=edit.px;
+        if(edit.py!==undefined) entry.obj.position.y=edit.py;
+        if(edit.pz!==undefined) entry.obj.position.z=edit.pz;
+        if(edit.ry!==undefined) entry.obj.rotation.y=edit.ry;
+      }
+    });
   });
 
   animate();
