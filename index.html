@@ -553,6 +553,7 @@ scene.add(gg);
 // ============ FARMHOUSE (editable) ============
 let farmhouse = null;
 let farmhouseVisible = true;
+const defaultObjects = []; // {obj, name, id} for selectable default objects
 
 function buildHouse(x, z, scale) {
   if(farmhouse) scene.remove(farmhouse);
@@ -611,7 +612,6 @@ function mkRound(x,z,s){
 const TREE_URL = 'assets/stylized_pine_tree_tree.glb';
 const loadBar = document.getElementById('loading-bar');
 let loadedTreeModel = null;
-const defaultObjects = []; // {obj, name, id} for selectable default objects
 const gltfLoader = new THREE.GLTFLoader();
 gltfLoader.load(TREE_URL,
   (gltf) => {
