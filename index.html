@@ -120,6 +120,76 @@
     color: #f0c8c8; padding: 8px 18px; border-radius: 20px; font-size: 12px;
     display: none; white-space: nowrap;
   }
+
+  /* ===== ADMIN PANEL ===== */
+  #admin-panel {
+    position: fixed; top: 0; right: -360px; width: 350px; height: 100%;
+    background: rgba(30,45,30,0.95); backdrop-filter: blur(14px);
+    z-index: 25; transition: right 0.3s ease; overflow-y: auto;
+    border-left: 1px solid rgba(126,205,106,0.2);
+  }
+  #admin-panel.open { right: 0; }
+  #admin-panel-header {
+    padding: 16px 18px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(126,205,106,0.2); position: sticky; top: 0;
+    background: rgba(30,45,30,0.98); z-index: 1;
+  }
+  #admin-panel-header span { font-size: 13px; font-weight: 700; color: #f0c06a; letter-spacing: 1.5px; text-transform: uppercase; }
+  #admin-panel-close {
+    background: rgba(255,255,255,0.08); border: none; color: #c8d8c4; font-size: 18px;
+    width: 30px; height: 30px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  #admin-panel-close:hover { background: rgba(255,255,255,0.15); }
+  .admin-section {
+    padding: 14px 18px; border-bottom: 1px solid rgba(126,205,106,0.1);
+  }
+  .admin-section-title {
+    font-size: 11px; font-weight: 700; color: #f0c06a; letter-spacing: 1.2px;
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+  .admin-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .admin-row label {
+    color: #c8d8c4; font-size: 12px; font-weight: 500;
+  }
+  .admin-slider {
+    width: 140px; accent-color: #7ecd6a; cursor: pointer;
+  }
+  .admin-value {
+    color: #7ecd6a; font-size: 11px; font-weight: 600; min-width: 36px; text-align: right;
+  }
+  .admin-color-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  }
+  .admin-color-row label {
+    color: #c8d8c4; font-size: 12px; font-weight: 500; flex: 1;
+  }
+  .admin-color-input {
+    width: 40px; height: 28px; border: 2px solid rgba(126,205,106,0.3);
+    border-radius: 6px; cursor: pointer; background: none; padding: 0;
+  }
+  .admin-btn {
+    background: rgba(126,205,106,0.15); border: 1px solid rgba(126,205,106,0.3);
+    color: #7ecd6a; padding: 8px 14px; border-radius: 10px; font-size: 12px;
+    font-weight: 600; cursor: pointer; transition: background 0.2s; width: 100%;
+    margin-bottom: 6px;
+  }
+  .admin-btn:hover { background: rgba(126,205,106,0.25); }
+  .admin-btn.danger {
+    background: rgba(200,80,80,0.15); border-color: rgba(200,80,80,0.3); color: #e08a8a;
+  }
+  .admin-btn.danger:hover { background: rgba(200,80,80,0.25); }
+  .admin-preset-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;
+  }
+  .admin-preset {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 8px; text-align: center; cursor: pointer;
+    font-size: 11px; color: #c8d8c4; transition: all 0.15s;
+  }
+  .admin-preset:hover { background: rgba(255,255,255,0.12); border-color: #7ecd6a; }
 </style>
 </head>
 <body>
@@ -141,7 +211,7 @@
   <div id="loading-bar-bg"><div id="loading-bar"></div></div>
 </div>
 
-<!-- ===== GAME UI (hidden until login) ===== -->
+<!-- ===== GAME UI ===== -->
 <div id="game-ui">
   <div id="ui-overlay"><div id="player-badge"><span class="dot"></span><span>ONLINE · <strong id="player-count">1 Player</strong></span></div></div>
   <div id="controls-hint">
@@ -160,6 +230,7 @@
   <div id="bottom-buttons">
     <button class="action-btn" id="build-btn">🔨 Build <span class="key-hint">B</span></button>
     <button class="action-btn" id="demolish-btn">🚧 Demolish <span class="key-hint">X</span></button>
+    <button class="action-btn" id="admin-btn" style="border-color:rgba(240,192,106,0.4);color:#f0c06a;">⚙️ Admin</button>
   </div>
   <div id="build-panel">
     <div id="build-panel-header">
@@ -176,6 +247,94 @@
   <div id="placement-hint">Click ground to place · Right-click or Esc to cancel</div>
   <div id="demolish-hint">Click a placed object to remove it · Right-click or Esc to cancel</div>
 </div>
+
+<!-- ===== ADMIN PANEL ===== -->
+<div id="admin-panel">
+  <div id="admin-panel-header">
+    <span>⚙️ ADMIN PANEL</span>
+    <button id="admin-panel-close">&times;</button>
+  </div>
+
+  <!-- MAP SIZE -->
+  <div class="admin-section">
+    <div class="admin-section-title">🗺️ Map Size</div>
+    <div class="admin-row">
+      <label>Ground Size</label>
+      <input type="range" class="admin-slider" id="admin-map-size" min="8" max="40" value="12" step="2">
+      <span class="admin-value" id="admin-map-size-val">12</span>
+    </div>
+  </div>
+
+  <!-- FARMHOUSE -->
+  <div class="admin-section">
+    <div class="admin-section-title">🏠 Farmhouse</div>
+    <div class="admin-row">
+      <label>Position X</label>
+      <input type="range" class="admin-slider" id="admin-house-x" min="-15" max="15" value="1" step="0.5">
+      <span class="admin-value" id="admin-house-x-val">1</span>
+    </div>
+    <div class="admin-row">
+      <label>Position Z</label>
+      <input type="range" class="admin-slider" id="admin-house-z" min="-15" max="15" value="-1" step="0.5">
+      <span class="admin-value" id="admin-house-z-val">-1</span>
+    </div>
+    <div class="admin-row">
+      <label>Scale</label>
+      <input type="range" class="admin-slider" id="admin-house-scale" min="0.5" max="2" value="1" step="0.1">
+      <span class="admin-value" id="admin-house-scale-val">1.0</span>
+    </div>
+    <button class="admin-btn danger" id="admin-house-toggle">Hide Farmhouse</button>
+  </div>
+
+  <!-- SKY & FOG -->
+  <div class="admin-section">
+    <div class="admin-section-title">🌤️ Sky & Atmosphere</div>
+    <div class="admin-color-row">
+      <label>Sky Color</label>
+      <input type="color" class="admin-color-input" id="admin-sky-color" value="#d4e4d0">
+    </div>
+    <div class="admin-color-row">
+      <label>Ground Color</label>
+      <input type="color" class="admin-color-input" id="admin-ground-color" value="#a8d89a">
+    </div>
+    <div class="admin-color-row">
+      <label>Light Warmth</label>
+      <input type="color" class="admin-color-input" id="admin-light-color" value="#fff0d4">
+    </div>
+    <div class="admin-row">
+      <label>Fog Density</label>
+      <input type="range" class="admin-slider" id="admin-fog" min="0" max="0.04" value="0.012" step="0.002">
+      <span class="admin-value" id="admin-fog-val">0.012</span>
+    </div>
+    <div class="admin-section-title" style="margin-top:10px;">🎨 Presets</div>
+    <div class="admin-preset-grid">
+      <div class="admin-preset" data-preset="default">🌿 Default</div>
+      <div class="admin-preset" data-preset="sunset">🌅 Sunset</div>
+      <div class="admin-preset" data-preset="night">🌙 Night</div>
+      <div class="admin-preset" data-preset="winter">❄️ Winter</div>
+      <div class="admin-preset" data-preset="cherry">🌸 Cherry Blossom</div>
+      <div class="admin-preset" data-preset="autumn">🍂 Autumn</div>
+    </div>
+  </div>
+
+  <!-- DECORATIONS -->
+  <div class="admin-section">
+    <div class="admin-section-title">🪨 Quick Decorations</div>
+    <button class="admin-btn" id="admin-add-rocks">Add Rocks (5)</button>
+    <button class="admin-btn" id="admin-add-path">Add Stone Path</button>
+    <button class="admin-btn" id="admin-add-pond">Add Pond</button>
+    <button class="admin-btn" id="admin-add-flowers">Add Flower Patch (8)</button>
+    <button class="admin-btn danger" id="admin-clear-all" style="margin-top:8px;">Clear All Placed Objects</button>
+  </div>
+
+  <!-- SAVE -->
+  <div class="admin-section">
+    <div class="admin-section-title">💾 Sync</div>
+    <button class="admin-btn" id="admin-save">Save Map Settings to Server</button>
+    <p style="color:rgba(200,216,196,0.5);font-size:10px;margin-top:6px;">Settings sync to Firebase so both players see the same map.</p>
+  </div>
+</div>
+
 <div id="click-indicator"></div>
 
 <!-- ===== SCRIPTS ===== -->
@@ -198,19 +357,14 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ============ PLAYER IDENTITY ============
 let localPlayerId = 'p_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
 let localPlayerName = '';
 
 // ============ LOGIN ============
 const nameInput = document.getElementById('name-input');
 const joinBtn = document.getElementById('join-btn');
-nameInput.addEventListener('input', () => {
-  joinBtn.disabled = nameInput.value.trim().length === 0;
-});
-nameInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && nameInput.value.trim()) startGame();
-});
+nameInput.addEventListener('input', () => { joinBtn.disabled = nameInput.value.trim().length === 0; });
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter' && nameInput.value.trim()) startGame(); });
 joinBtn.addEventListener('click', startGame);
 
 function startGame() {
@@ -239,7 +393,8 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.prepend(renderer.domElement);
 
 // Lighting
-scene.add(new THREE.AmbientLight(0xfff5e6, 0.6));
+const ambLight = new THREE.AmbientLight(0xfff5e6, 0.6);
+scene.add(ambLight);
 const dl = new THREE.DirectionalLight(0xfff0d4, 0.9);
 dl.position.set(10,20,8); dl.castShadow = true;
 dl.shadow.mapSize.set(1024,1024);
@@ -251,29 +406,39 @@ scene.add(dl);
 const fl = new THREE.DirectionalLight(0xc8e0ff, 0.3);
 fl.position.set(-8,10,-6); scene.add(fl);
 
-// Ground slab
+// ============ GROUND (editable) ============
+let mapSize = 12;
 const gg = new THREE.Group();
-const gt = new THREE.Mesh(new THREE.BoxGeometry(12,0.3,12), new THREE.MeshLambertMaterial({color:0xa8d89a}));
-gt.receiveShadow=true; gg.add(gt);
-const ge = new THREE.Mesh(new THREE.BoxGeometry(12.02,0.15,12.02), new THREE.MeshLambertMaterial({color:0x6b8c52}));
-ge.position.y=-0.2; gg.add(ge);
-const gd = new THREE.Mesh(new THREE.BoxGeometry(12,1.0,12), new THREE.MeshLambertMaterial({color:0xb07040}));
-gd.position.y=-0.75; gd.castShadow=true; gg.add(gd);
-const gb = new THREE.Mesh(new THREE.BoxGeometry(12,0.25,12), new THREE.MeshLambertMaterial({color:0x8b5530}));
-gb.position.y=-1.4; gg.add(gb);
+let gtMesh, geMesh, gdMesh, gbMesh, groundPlane;
+
+function buildGround(size) {
+  // Remove old
+  while(gg.children.length) gg.remove(gg.children[0]);
+  if(groundPlane) scene.remove(groundPlane);
+
+  gtMesh = new THREE.Mesh(new THREE.BoxGeometry(size,0.3,size), new THREE.MeshLambertMaterial({color:0xa8d89a}));
+  gtMesh.receiveShadow=true; gg.add(gtMesh);
+  geMesh = new THREE.Mesh(new THREE.BoxGeometry(size+0.02,0.15,size+0.02), new THREE.MeshLambertMaterial({color:0x6b8c52}));
+  geMesh.position.y=-0.2; gg.add(geMesh);
+  gdMesh = new THREE.Mesh(new THREE.BoxGeometry(size,1.0,size), new THREE.MeshLambertMaterial({color:0xb07040}));
+  gdMesh.position.y=-0.75; gdMesh.castShadow=true; gg.add(gdMesh);
+  gbMesh = new THREE.Mesh(new THREE.BoxGeometry(size,0.25,size), new THREE.MeshLambertMaterial({color:0x8b5530}));
+  gbMesh.position.y=-1.4; gg.add(gbMesh);
+
+  groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(size,size), new THREE.MeshBasicMaterial({visible:false}));
+  groundPlane.rotation.x=-Math.PI/2; groundPlane.position.y=0.15;
+  scene.add(groundPlane);
+  mapSize = size;
+}
+buildGround(12);
 scene.add(gg);
 
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(12,12), new THREE.MeshBasicMaterial({visible:false}));
-ground.rotation.x=-Math.PI/2; ground.position.y=0.15; scene.add(ground);
+// ============ FARMHOUSE (editable) ============
+let farmhouse = null;
+let farmhouseVisible = true;
 
-// Grass tufts
-for(let i=0;i<15;i++){
-  const tt=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.3,0.15),new THREE.MeshLambertMaterial({color:0x8cc47a}));
-  tt.position.set((Math.random()-0.5)*10,0.25,(Math.random()-0.5)*10); tt.castShadow=true; scene.add(tt);
-}
-
-// Farmhouse
-function mkHouse(x,z){
+function buildHouse(x, z, scale) {
+  if(farmhouse) scene.remove(farmhouse);
   const g=new THREE.Group();
   const b=new THREE.Mesh(new THREE.BoxGeometry(4,3,3.5),new THREE.MeshLambertMaterial({color:0xe8675a}));
   b.position.y=1.5;b.castShadow=true;b.receiveShadow=true;g.add(b);
@@ -287,11 +452,21 @@ function mkHouse(x,z){
   const w2=new THREE.Mesh(wg,wm);w2.position.set(1.2,2,1.76);g.add(w2);
   const c=new THREE.Mesh(new THREE.BoxGeometry(0.6,1.5,0.6),new THREE.MeshLambertMaterial({color:0x8b6050}));
   c.position.set(1.2,4.5,-0.5);c.castShadow=true;g.add(c);
-  g.position.set(x,0,z);scene.add(g);
+  g.position.set(x,0,z);
+  g.scale.setScalar(scale);
+  scene.add(g);
+  farmhouse = g;
+  farmhouseVisible = true;
 }
-mkHouse(1,-1);
+buildHouse(1, -1, 1);
 
-// Fallback primitive trees
+// Grass tufts
+for(let i=0;i<15;i++){
+  const tt=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.3,0.15),new THREE.MeshLambertMaterial({color:0x8cc47a}));
+  tt.position.set((Math.random()-0.5)*10,0.25,(Math.random()-0.5)*10); tt.castShadow=true; scene.add(tt);
+}
+
+// Fallback trees
 function mkPine(x,z,s){
   const g=new THREE.Group();
   const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.15*s,0.25*s,1.5*s,6),new THREE.MeshLambertMaterial({color:0x8b6848}));
@@ -311,37 +486,24 @@ function mkRound(x,z,s){
   g.position.set(x,0,z);scene.add(g);return g;
 }
 
-// ============ LOAD GLB TREES ============
+// ============ GLB TREES ============
 const TREE_URL = 'assets/stylized_pine_tree_tree.glb';
 const loadBar = document.getElementById('loading-bar');
 let loadedTreeModel = null;
-
 const gltfLoader = new THREE.GLTFLoader();
-gltfLoader.load(
-  TREE_URL,
+gltfLoader.load(TREE_URL,
   (gltf) => {
     const treeModel = gltf.scene;
-    treeModel.traverse(child => {
-      if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; }
-    });
+    treeModel.traverse(child => { if (child.isMesh) { child.castShadow=true; child.receiveShadow=true; }});
     loadedTreeModel = treeModel;
-    [{ x:-4,z:-3,scale:0.02 },{ x:-3,z:3,scale:0.015 },{ x:4,z:3,scale:0.018 }].forEach(t => {
-      const tree = treeModel.clone();
-      tree.position.set(t.x, 0.15, t.z);
-      tree.scale.setScalar(t.scale);
-      scene.add(tree);
+    [{x:-4,z:-3,scale:0.02},{x:-3,z:3,scale:0.015},{x:4,z:3,scale:0.018}].forEach(t => {
+      const tree = treeModel.clone(); tree.position.set(t.x,0.15,t.z); tree.scale.setScalar(t.scale); scene.add(tree);
     });
-    console.log('GLB trees loaded!');
-    loadBar.style.width = '100%';
-    setTimeout(() => document.getElementById('loading').classList.add('done'), 300);
+    loadBar.style.width='100%';
+    setTimeout(()=>document.getElementById('loading').classList.add('done'),300);
   },
-  (progress) => { if (progress.total) loadBar.style.width = (progress.loaded/progress.total*100)+'%'; },
-  (error) => {
-    console.warn('GLB failed, using fallback:', error);
-    mkPine(-4,-3,0.02); mkPine(-3,3,0.015); mkRound(4,3,0.018);
-    loadBar.style.width = '100%';
-    setTimeout(() => document.getElementById('loading').classList.add('done'), 300);
-  }
+  (p)=>{if(p.total)loadBar.style.width=(p.loaded/p.total*100)+'%';},
+  ()=>{mkPine(-4,-3,0.02);mkPine(-3,3,0.015);mkRound(4,3,0.018);loadBar.style.width='100%';setTimeout(()=>document.getElementById('loading').classList.add('done'),300);}
 );
 
 // Flowers
@@ -369,16 +531,14 @@ const railM=new THREE.MeshLambertMaterial({color:0xb89858});
   r.position.set((x1+x2)/2,0.55,(z1+z2)/2);r.rotation.y=Math.atan2(dz,dx);scene.add(r);
 });
 
-// ============ CREATE SHEEP CHARACTER ============
+// ============ SHEEP CHARACTER ============
 function createSheep(name, woolColor) {
   const sheep = new THREE.Group();
   const sb = new THREE.Mesh(new THREE.SphereGeometry(0.55,8,6), new THREE.MeshLambertMaterial({color: woolColor}));
   sb.position.y=0.7; sb.scale.set(1.1,0.9,0.85); sb.castShadow=true; sheep.add(sb);
   sheep.bodyMesh = sb;
-
   const sh = new THREE.Mesh(new THREE.SphereGeometry(0.3,8,6), new THREE.MeshLambertMaterial({color:0x3d3530}));
   sh.position.set(0,0.9,0.5); sh.castShadow=true; sheep.add(sh);
-
   [[-0.12,0.95,0.72],[0.12,0.95,0.72]].forEach(p=>{
     const e=new THREE.Mesh(new THREE.SphereGeometry(0.06,6,4),new THREE.MeshLambertMaterial({color:0xffffff}));
     e.position.set(...p); sheep.add(e);
@@ -387,37 +547,27 @@ function createSheep(name, woolColor) {
     const e=new THREE.Mesh(new THREE.SphereGeometry(0.035,6,4),new THREE.MeshLambertMaterial({color:0x1a1a1a}));
     e.position.set(...p); sheep.add(e);
   });
-
-  const sheepLegs = [];
-  const lg=new THREE.CylinderGeometry(0.07,0.07,0.4,5), lm=new THREE.MeshLambertMaterial({color:0x3d3530});
+  const sheepLegs=[];
+  const lg=new THREE.CylinderGeometry(0.07,0.07,0.4,5),lm=new THREE.MeshLambertMaterial({color:0x3d3530});
   [[-0.25,0.2,0.2],[0.25,0.2,0.2],[-0.25,0.2,-0.2],[0.25,0.2,-0.2]].forEach(p=>{
-    const l=new THREE.Mesh(lg,lm); l.position.set(...p); l.castShadow=true; sheep.add(l); sheepLegs.push(l);
+    const l=new THREE.Mesh(lg,lm);l.position.set(...p);l.castShadow=true;sheep.add(l);sheepLegs.push(l);
   });
   sheep.legs = sheepLegs;
-
-  // Name tag
-  const nc=document.createElement('canvas'); nc.width=128; nc.height=32;
+  const nc=document.createElement('canvas');nc.width=128;nc.height=32;
   const nx=nc.getContext('2d');
-  nx.fillStyle='rgba(45,65,45,0.85)'; nx.beginPath(); nx.roundRect(0,0,128,32,8); nx.fill();
-  nx.fillStyle='#e8f0e4'; nx.font='bold 16px sans-serif'; nx.textAlign='center';
-  nx.fillText(name.toUpperCase(), 64, 22);
+  nx.fillStyle='rgba(45,65,45,0.85)';nx.beginPath();nx.roundRect(0,0,128,32,8);nx.fill();
+  nx.fillStyle='#e8f0e4';nx.font='bold 16px sans-serif';nx.textAlign='center';
+  nx.fillText(name.toUpperCase(),64,22);
   const nt=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(nc),transparent:true}));
-  nt.scale.set(1.5,0.4,1); nt.position.y=1.6; sheep.add(nt);
-
-  const shadow = new THREE.Mesh(new THREE.CircleGeometry(0.5,16), new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.12}));
-  shadow.rotation.x=-Math.PI/2; shadow.position.y=0.01;
-  sheep.shadowMesh = shadow;
-
+  nt.scale.set(1.5,0.4,1);nt.position.y=1.6;sheep.add(nt);
+  const shadow=new THREE.Mesh(new THREE.CircleGeometry(0.5,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.12}));
+  shadow.rotation.x=-Math.PI/2;shadow.position.y=0.01;
+  sheep.shadowMesh=shadow;
   return sheep;
 }
 
-// ============ LOCAL PLAYER ============
 let player, playerShadow, legs;
-
-// ============ REMOTE PLAYERS ============
 const remotePlayers = {};
-
-// ============ PLACED OBJECTS ============
 let placedObjects = [];
 const placedObjectsMap = {};
 
@@ -425,342 +575,422 @@ const placedObjectsMap = {};
 let selectedBuildItem = null;
 let demolishMode = false;
 
-function placeTree(x, z) {
+function placeTree(x,z){
   let obj;
-  if (loadedTreeModel) {
-    obj = loadedTreeModel.clone();
-    obj.position.set(x, 0.15, z);
-    obj.scale.setScalar(0.02);
-    scene.add(obj);
-  } else {
-    obj = mkPine(x, z, 0.02);
-  }
+  if(loadedTreeModel){obj=loadedTreeModel.clone();obj.position.set(x,0.15,z);obj.scale.setScalar(0.02);scene.add(obj);}
+  else{obj=mkPine(x,z,0.02);}
   return obj;
 }
-function placeGrassTuft(x, z) {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(0.15,0.3,0.15), new THREE.MeshLambertMaterial({color:0x8cc47a}));
-  m.position.set(x, 0.25, z); m.castShadow = true; scene.add(m); return m;
+function placeGrassTuft(x,z){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.3,0.15),new THREE.MeshLambertMaterial({color:0x8cc47a}));
+  m.position.set(x,0.25,z);m.castShadow=true;scene.add(m);return m;
 }
-function placeFlower(x, z) {
-  const fg = new THREE.Group();
-  const st = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.4,4), new THREE.MeshLambertMaterial({color:0x6aaa55}));
-  st.position.y = 0.2; fg.add(st);
-  const cs = [0xf5a0b0, 0xf0d060, 0xffffff, 0xc8a0f0];
-  const pt = new THREE.Mesh(new THREE.SphereGeometry(0.12,6,4), new THREE.MeshLambertMaterial({color:cs[Math.floor(Math.random()*4)]}));
-  pt.position.y = 0.45; fg.add(pt);
-  fg.position.set(x, 0, z); scene.add(fg); return fg;
+function placeFlower(x,z){
+  const fg=new THREE.Group();
+  const st=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.4,4),new THREE.MeshLambertMaterial({color:0x6aaa55}));
+  st.position.y=0.2;fg.add(st);
+  const cs=[0xf5a0b0,0xf0d060,0xffffff,0xc8a0f0];
+  const pt=new THREE.Mesh(new THREE.SphereGeometry(0.12,6,4),new THREE.MeshLambertMaterial({color:cs[Math.floor(Math.random()*4)]}));
+  pt.position.y=0.45;fg.add(pt);
+  fg.position.set(x,0,z);scene.add(fg);return fg;
 }
-function placeFencePost(x, z) {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(0.15,0.8,0.15), new THREE.MeshLambertMaterial({color:0xc4a46a}));
-  m.position.set(x, 0.4, z); m.castShadow = true; scene.add(m); return m;
+function placeFencePost(x,z){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.8,0.15),new THREE.MeshLambertMaterial({color:0xc4a46a}));
+  m.position.set(x,0.4,z);m.castShadow=true;scene.add(m);return m;
+}
+function placeRock(x,z){
+  const g=new THREE.Group();
+  const r1=new THREE.Mesh(new THREE.SphereGeometry(0.3,6,4),new THREE.MeshLambertMaterial({color:0x8a8a7a}));
+  r1.scale.set(1,0.6,0.9);r1.position.y=0.18;r1.castShadow=true;g.add(r1);
+  const r2=new THREE.Mesh(new THREE.SphereGeometry(0.18,5,3),new THREE.MeshLambertMaterial({color:0x9a9a8a}));
+  r2.position.set(0.2,0.12,0.15);r2.castShadow=true;g.add(r2);
+  g.position.set(x,0,z);scene.add(g);return g;
+}
+function placeStonePath(x,z){
+  const g=new THREE.Group();
+  for(let i=0;i<5;i++){
+    const s=new THREE.Mesh(new THREE.CylinderGeometry(0.2+Math.random()*0.15,0.2+Math.random()*0.15,0.06,6),
+      new THREE.MeshLambertMaterial({color:0xb0aa98}));
+    s.position.set((Math.random()-0.5)*1.5,0.16,i*0.7-1.4);s.rotation.y=Math.random()*Math.PI;
+    s.receiveShadow=true;g.add(s);
+  }
+  g.position.set(x,0,z);scene.add(g);return g;
+}
+function placePond(x,z){
+  const g=new THREE.Group();
+  const water=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.3,0.1,16),new THREE.MeshLambertMaterial({color:0x5a9aba,transparent:true,opacity:0.7}));
+  water.position.y=0.12;water.receiveShadow=true;g.add(water);
+  const edge=new THREE.Mesh(new THREE.TorusGeometry(1.25,0.12,6,16),new THREE.MeshLambertMaterial({color:0x7a8a6a}));
+  edge.rotation.x=-Math.PI/2;edge.position.y=0.15;g.add(edge);
+  // Lily pads
+  for(let i=0;i<3;i++){
+    const lp=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,0.02,8),new THREE.MeshLambertMaterial({color:0x4a8a3a}));
+    const a=Math.random()*Math.PI*2,r=Math.random()*0.7;
+    lp.position.set(Math.cos(a)*r,0.18,Math.sin(a)*r);g.add(lp);
+  }
+  g.position.set(x,0,z);scene.add(g);return g;
 }
 
-const buildFactories = { tree: placeTree, grass: placeGrassTuft, flower: placeFlower, fence: placeFencePost };
+const buildFactories = { tree:placeTree, grass:placeGrassTuft, flower:placeFlower, fence:placeFencePost, rock:placeRock, path:placeStonePath, pond:placePond };
 
-function updateBuildUI() {
-  document.querySelectorAll('.build-slot').forEach(s => s.classList.toggle('selected', s.dataset.item === selectedBuildItem));
-  document.getElementById('placement-hint').classList.toggle('visible', selectedBuildItem !== null);
-  document.getElementById('demolish-hint').style.display = demolishMode ? 'block' : 'none';
-  document.getElementById('demolish-btn').classList.toggle('active', demolishMode);
+function updateBuildUI(){
+  document.querySelectorAll('.build-slot').forEach(s=>s.classList.toggle('selected',s.dataset.item===selectedBuildItem));
+  document.getElementById('placement-hint').classList.toggle('visible',selectedBuildItem!==null);
+  document.getElementById('demolish-hint').style.display=demolishMode?'block':'none';
+  document.getElementById('demolish-btn').classList.toggle('active',demolishMode);
 }
-function cancelBuild() { selectedBuildItem = null; demolishMode = false; updateBuildUI(); }
-function toggleDemolish() {
-  if (demolishMode) { cancelBuild(); return; }
-  selectedBuildItem = null;
-  buildPanel.classList.remove('open');
-  demolishMode = true;
-  updateBuildUI();
+function cancelBuild(){selectedBuildItem=null;demolishMode=false;updateBuildUI();}
+function toggleDemolish(){
+  if(demolishMode){cancelBuild();return;}
+  selectedBuildItem=null;buildPanel.classList.remove('open');demolishMode=true;updateBuildUI();
 }
 
-const buildPanel = document.getElementById('build-panel');
-document.getElementById('build-btn').addEventListener('click', () => {
-  demolishMode = false;
-  buildPanel.classList.toggle('open');
-  if (!buildPanel.classList.contains('open')) cancelBuild();
-  updateBuildUI();
+const buildPanel=document.getElementById('build-panel');
+document.getElementById('build-btn').addEventListener('click',()=>{
+  demolishMode=false;buildPanel.classList.toggle('open');
+  if(!buildPanel.classList.contains('open'))cancelBuild();updateBuildUI();
 });
-document.getElementById('demolish-btn').addEventListener('click', toggleDemolish);
-document.getElementById('build-close').addEventListener('click', () => { buildPanel.classList.remove('open'); cancelBuild(); });
-document.querySelectorAll('.build-slot').forEach(slot => {
-  slot.addEventListener('click', () => {
-    selectedBuildItem = slot.dataset.item;
-    demolishMode = false;
-    updateBuildUI();
-    buildPanel.classList.remove('open');
-  });
+document.getElementById('demolish-btn').addEventListener('click',toggleDemolish);
+document.getElementById('build-close').addEventListener('click',()=>{buildPanel.classList.remove('open');cancelBuild();});
+document.querySelectorAll('.build-slot').forEach(slot=>{
+  slot.addEventListener('click',()=>{selectedBuildItem=slot.dataset.item;demolishMode=false;updateBuildUI();buildPanel.classList.remove('open');});
 });
-addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT') return;
-  if (e.key === 'b' || e.key === 'B') { demolishMode = false; buildPanel.classList.toggle('open'); if (!buildPanel.classList.contains('open')) cancelBuild(); updateBuildUI(); }
-  if (e.key === 'x' || e.key === 'X') { toggleDemolish(); }
-  if (e.key === 'Escape') { buildPanel.classList.remove('open'); cancelBuild(); }
+addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(e.key==='b'||e.key==='B'){demolishMode=false;buildPanel.classList.toggle('open');if(!buildPanel.classList.contains('open'))cancelBuild();updateBuildUI();}
+  if(e.key==='x'||e.key==='X'){toggleDemolish();}
+  if(e.key==='Escape'){buildPanel.classList.remove('open');cancelBuild();document.getElementById('admin-panel').classList.remove('open');}
 });
-renderer.domElement.addEventListener('contextmenu', e => { e.preventDefault(); cancelBuild(); });
+renderer.domElement.addEventListener('contextmenu',e=>{e.preventDefault();cancelBuild();});
 
 // ============ MOVEMENT ============
-let targetPos = new THREE.Vector3(0,0,2), isMoving = false;
-const ray = new THREE.Raycaster(), mss = new THREE.Vector2();
+let targetPos=new THREE.Vector3(0,0,2),isMoving=false;
+const ray=new THREE.Raycaster(),mss=new THREE.Vector2();
 
-renderer.domElement.addEventListener('click', e => {
-  if (isDrag) return;
-  mss.x = (e.clientX/innerWidth)*2-1; mss.y = -(e.clientY/innerHeight)*2+1;
-  ray.setFromCamera(mss, camera);
-
-  // Demolish mode
-  if (demolishMode) {
-    let allMeshes = [];
-    placedObjects.forEach(obj => {
-      if (obj.isMesh) { allMeshes.push({ mesh: obj, root: obj }); }
-      else { obj.traverse(child => { if (child.isMesh) allMeshes.push({ mesh: child, root: obj }); }); }
+renderer.domElement.addEventListener('click',e=>{
+  if(isDrag)return;
+  mss.x=(e.clientX/innerWidth)*2-1;mss.y=-(e.clientY/innerHeight)*2+1;
+  ray.setFromCamera(mss,camera);
+  if(demolishMode){
+    let allMeshes=[];
+    placedObjects.forEach(obj=>{
+      if(obj.isMesh){allMeshes.push({mesh:obj,root:obj});}
+      else{obj.traverse(child=>{if(child.isMesh)allMeshes.push({mesh:child,root:obj});});}
     });
-    const hits = ray.intersectObjects(allMeshes.map(m => m.mesh), false);
-    if (hits.length) {
-      const hitMesh = hits[0].object;
-      const entry = allMeshes.find(m => m.mesh === hitMesh);
-      if (entry) {
-        let fbKey = null;
-        for (const [key, obj] of Object.entries(placedObjectsMap)) {
-          if (obj === entry.root) { fbKey = key; break; }
-        }
-        if (fbKey) { db.ref('objects/' + fbKey).remove(); }
+    const hits=ray.intersectObjects(allMeshes.map(m=>m.mesh),false);
+    if(hits.length){
+      const entry=allMeshes.find(m=>m.mesh===hits[0].object);
+      if(entry){
+        let fbKey=null;
+        for(const[key,obj]of Object.entries(placedObjectsMap)){if(obj===entry.root){fbKey=key;break;}}
+        if(fbKey)db.ref('objects/'+fbKey).remove();
       }
     }
     return;
   }
-
-  const h = ray.intersectObject(ground);
-  if (h.length) {
-    if (selectedBuildItem) {
-      const pt = h[0].point;
-      db.ref('objects').push({ type: selectedBuildItem, x: pt.x, z: pt.z, placedBy: localPlayerId });
-      cancelBuild();
-      return;
+  const h=ray.intersectObject(groundPlane);
+  if(h.length){
+    if(selectedBuildItem){
+      const pt=h[0].point;
+      db.ref('objects').push({type:selectedBuildItem,x:pt.x,z:pt.z,placedBy:localPlayerId});
+      cancelBuild();return;
     }
-    targetPos.copy(h[0].point); targetPos.y = 0; isMoving = true;
-    const ind = document.getElementById('click-indicator');
-    ind.style.left = e.clientX+'px'; ind.style.top = e.clientY+'px';
-    ind.classList.remove('active'); void ind.offsetWidth; ind.classList.add('active');
+    targetPos.copy(h[0].point);targetPos.y=0;isMoving=true;
+    const ind=document.getElementById('click-indicator');
+    ind.style.left=e.clientX+'px';ind.style.top=e.clientY+'px';
+    ind.classList.remove('active');void ind.offsetWidth;ind.classList.add('active');
   }
 });
 
 // ============ CAMERA ============
-let isDrag=false, pmx=0, pmy=0, camA=Math.PI/4, camP=0.5, camD=14;
-renderer.domElement.addEventListener('mousedown', e => { isDrag=false; pmx=e.clientX; pmy=e.clientY; });
-renderer.domElement.addEventListener('mousemove', e => {
-  if (e.buttons!==1) return;
-  const dx=e.clientX-pmx, dy=e.clientY-pmy;
-  if (Math.abs(dx)>3||Math.abs(dy)>3) isDrag=true;
-  camA -= dx*0.005; camP = Math.max(0.2, Math.min(1.2, camP+dy*0.005));
-  pmx=e.clientX; pmy=e.clientY;
+let isDrag=false,pmx=0,pmy=0,camA=Math.PI/4,camP=0.5,camD=14;
+renderer.domElement.addEventListener('mousedown',e=>{isDrag=false;pmx=e.clientX;pmy=e.clientY;});
+renderer.domElement.addEventListener('mousemove',e=>{
+  if(e.buttons!==1)return;
+  const dx=e.clientX-pmx,dy=e.clientY-pmy;
+  if(Math.abs(dx)>3||Math.abs(dy)>3)isDrag=true;
+  camA-=dx*0.005;camP=Math.max(0.2,Math.min(1.2,camP+dy*0.005));
+  pmx=e.clientX;pmy=e.clientY;
 });
-renderer.domElement.addEventListener('wheel', e => { camD = Math.max(6, Math.min(22, camD+e.deltaY*0.02)); });
-renderer.domElement.addEventListener('touchstart', e => { if(e.touches.length===1){ pmx=e.touches[0].clientX; pmy=e.touches[0].clientY; isDrag=false; }});
-renderer.domElement.addEventListener('touchmove', e => {
-  if (e.touches.length===1) {
-    const dx=e.touches[0].clientX-pmx, dy=e.touches[0].clientY-pmy;
-    if (Math.abs(dx)>3||Math.abs(dy)>3) isDrag=true;
-    camA -= dx*0.005; camP = Math.max(0.2, Math.min(1.2, camP+dy*0.005));
-    pmx=e.touches[0].clientX; pmy=e.touches[0].clientY;
+renderer.domElement.addEventListener('wheel',e=>{camD=Math.max(6,Math.min(30,camD+e.deltaY*0.02));});
+renderer.domElement.addEventListener('touchstart',e=>{if(e.touches.length===1){pmx=e.touches[0].clientX;pmy=e.touches[0].clientY;isDrag=false;}});
+renderer.domElement.addEventListener('touchmove',e=>{
+  if(e.touches.length===1){
+    const dx=e.touches[0].clientX-pmx,dy=e.touches[0].clientY-pmy;
+    if(Math.abs(dx)>3||Math.abs(dy)>3)isDrag=true;
+    camA-=dx*0.005;camP=Math.max(0.2,Math.min(1.2,camP+dy*0.005));
+    pmx=e.touches[0].clientX;pmy=e.touches[0].clientY;
   }
   e.preventDefault();
-}, {passive:false});
+},{passive:false});
 
-// ============ CHAT (Firebase synced) ============
-const ci = document.getElementById('chat-input'), cm = document.getElementById('chat-messages');
-function sendMsg() {
-  const m = ci.value.trim(); if(!m) return;
-  db.ref('chat').push({ name: localPlayerName, text: m, time: Date.now() });
-  ci.value = '';
+// ============ CHAT ============
+const ci=document.getElementById('chat-input'),cm=document.getElementById('chat-messages');
+function sendMsg(){
+  const m=ci.value.trim();if(!m)return;
+  db.ref('chat').push({name:localPlayerName,text:m,time:Date.now()});
+  ci.value='';
 }
-document.getElementById('chat-send').addEventListener('click', sendMsg);
-ci.addEventListener('keydown', e => { if(e.key==='Enter') sendMsg(); });
+document.getElementById('chat-send').addEventListener('click',sendMsg);
+ci.addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
+function escapeHTML(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
-function escapeHTML(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+// ============ ADMIN PANEL ============
+const adminPanel = document.getElementById('admin-panel');
+document.getElementById('admin-btn').addEventListener('click', () => adminPanel.classList.toggle('open'));
+document.getElementById('admin-panel-close').addEventListener('click', () => adminPanel.classList.remove('open'));
+
+// Map size slider
+const mapSizeSlider = document.getElementById('admin-map-size');
+mapSizeSlider.addEventListener('input', () => {
+  document.getElementById('admin-map-size-val').textContent = mapSizeSlider.value;
+  buildGround(parseFloat(mapSizeSlider.value));
+});
+
+// House position/scale
+const houseXSlider = document.getElementById('admin-house-x');
+const houseZSlider = document.getElementById('admin-house-z');
+const houseScaleSlider = document.getElementById('admin-house-scale');
+houseXSlider.addEventListener('input', () => {
+  document.getElementById('admin-house-x-val').textContent = houseXSlider.value;
+  if(farmhouse && farmhouseVisible) farmhouse.position.x = parseFloat(houseXSlider.value);
+});
+houseZSlider.addEventListener('input', () => {
+  document.getElementById('admin-house-z-val').textContent = houseZSlider.value;
+  if(farmhouse && farmhouseVisible) farmhouse.position.z = parseFloat(houseZSlider.value);
+});
+houseScaleSlider.addEventListener('input', () => {
+  document.getElementById('admin-house-scale-val').textContent = parseFloat(houseScaleSlider.value).toFixed(1);
+  if(farmhouse && farmhouseVisible) farmhouse.scale.setScalar(parseFloat(houseScaleSlider.value));
+});
+document.getElementById('admin-house-toggle').addEventListener('click', () => {
+  if(farmhouseVisible) {
+    scene.remove(farmhouse);
+    farmhouseVisible = false;
+    document.getElementById('admin-house-toggle').textContent = 'Show Farmhouse';
+  } else {
+    scene.add(farmhouse);
+    farmhouseVisible = true;
+    document.getElementById('admin-house-toggle').textContent = 'Hide Farmhouse';
+  }
+});
+
+// Sky/fog colors
+document.getElementById('admin-sky-color').addEventListener('input', e => {
+  const c = new THREE.Color(e.target.value);
+  scene.background = c;
+  scene.fog.color = c;
+  document.body.style.background = e.target.value;
+});
+document.getElementById('admin-ground-color').addEventListener('input', e => {
+  if(gtMesh) gtMesh.material.color.set(e.target.value);
+});
+document.getElementById('admin-light-color').addEventListener('input', e => {
+  dl.color.set(e.target.value);
+});
+document.getElementById('admin-fog').addEventListener('input', e => {
+  scene.fog.density = parseFloat(e.target.value);
+  document.getElementById('admin-fog-val').textContent = e.target.value;
+});
+
+// Sky presets
+const skyPresets = {
+  default:  { sky:'#d4e4d0', ground:'#a8d89a', light:'#fff0d4', fog:0.012 },
+  sunset:   { sky:'#f0b878', ground:'#c8a870', light:'#ff9944', fog:0.015 },
+  night:    { sky:'#1a2030', ground:'#2a3a2a', light:'#4466aa', fog:0.02 },
+  winter:   { sky:'#e0e8f0', ground:'#d8dce0', light:'#e8e8ff', fog:0.01 },
+  cherry:   { sky:'#f5d0d8', ground:'#c8b8a0', light:'#ffe0e0', fog:0.01 },
+  autumn:   { sky:'#d8c0a0', ground:'#b09060', light:'#f0c878', fog:0.014 }
+};
+document.querySelectorAll('.admin-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const p = skyPresets[btn.dataset.preset];
+    if(!p) return;
+    scene.background = new THREE.Color(p.sky);
+    scene.fog.color = new THREE.Color(p.sky);
+    scene.fog.density = p.fog;
+    document.body.style.background = p.sky;
+    if(gtMesh) gtMesh.material.color.set(p.ground);
+    dl.color.set(p.light);
+    document.getElementById('admin-sky-color').value = p.sky;
+    document.getElementById('admin-ground-color').value = p.ground;
+    document.getElementById('admin-light-color').value = p.light;
+    document.getElementById('admin-fog').value = p.fog;
+    document.getElementById('admin-fog-val').textContent = p.fog;
+  });
+});
+
+// Quick decorations
+document.getElementById('admin-add-rocks').addEventListener('click', () => {
+  for(let i=0;i<5;i++){
+    const half=mapSize/2-1;
+    const x=(Math.random()-0.5)*half*2, z=(Math.random()-0.5)*half*2;
+    db.ref('objects').push({type:'rock',x,z,placedBy:localPlayerId});
+  }
+});
+document.getElementById('admin-add-path').addEventListener('click', () => {
+  db.ref('objects').push({type:'path',x:0,z:2,placedBy:localPlayerId});
+});
+document.getElementById('admin-add-pond').addEventListener('click', () => {
+  const half=mapSize/2-2;
+  const x=(Math.random()-0.5)*half*2, z=(Math.random()-0.5)*half*2;
+  db.ref('objects').push({type:'pond',x,z,placedBy:localPlayerId});
+});
+document.getElementById('admin-add-flowers').addEventListener('click', () => {
+  for(let i=0;i<8;i++){
+    const half=mapSize/2-1;
+    const x=(Math.random()-0.5)*half*2, z=(Math.random()-0.5)*half*2;
+    db.ref('objects').push({type:'flower',x,z,placedBy:localPlayerId});
+  }
+});
+document.getElementById('admin-clear-all').addEventListener('click', () => {
+  if(confirm('Remove ALL placed objects?')) db.ref('objects').remove();
+});
+
+// Save map settings to Firebase
+document.getElementById('admin-save').addEventListener('click', () => {
+  db.ref('mapSettings').set({
+    mapSize: parseFloat(mapSizeSlider.value),
+    houseX: parseFloat(houseXSlider.value),
+    houseZ: parseFloat(houseZSlider.value),
+    houseScale: parseFloat(houseScaleSlider.value),
+    houseVisible: farmhouseVisible,
+    skyColor: document.getElementById('admin-sky-color').value,
+    groundColor: document.getElementById('admin-ground-color').value,
+    lightColor: document.getElementById('admin-light-color').value,
+    fogDensity: parseFloat(document.getElementById('admin-fog').value)
+  });
+  // Flash the button
+  const btn = document.getElementById('admin-save');
+  btn.textContent = '✅ Saved!';
+  setTimeout(() => btn.textContent = 'Save Map Settings to Server', 1500);
+});
+
+// Load map settings from Firebase
+function loadMapSettings(data) {
+  if(!data) return;
+  if(data.mapSize) { buildGround(data.mapSize); mapSizeSlider.value=data.mapSize; document.getElementById('admin-map-size-val').textContent=data.mapSize; }
+  if(data.houseX!==undefined) { houseXSlider.value=data.houseX; document.getElementById('admin-house-x-val').textContent=data.houseX; }
+  if(data.houseZ!==undefined) { houseZSlider.value=data.houseZ; document.getElementById('admin-house-z-val').textContent=data.houseZ; }
+  if(data.houseScale) { houseScaleSlider.value=data.houseScale; document.getElementById('admin-house-scale-val').textContent=parseFloat(data.houseScale).toFixed(1); }
+  buildHouse(data.houseX||1, data.houseZ||-1, data.houseScale||1);
+  if(data.houseVisible===false) { scene.remove(farmhouse); farmhouseVisible=false; document.getElementById('admin-house-toggle').textContent='Show Farmhouse'; }
+  if(data.skyColor) {
+    scene.background=new THREE.Color(data.skyColor); scene.fog.color=new THREE.Color(data.skyColor);
+    document.body.style.background=data.skyColor; document.getElementById('admin-sky-color').value=data.skyColor;
+  }
+  if(data.groundColor) { if(gtMesh)gtMesh.material.color.set(data.groundColor); document.getElementById('admin-ground-color').value=data.groundColor; }
+  if(data.lightColor) { dl.color.set(data.lightColor); document.getElementById('admin-light-color').value=data.lightColor; }
+  if(data.fogDensity!==undefined) { scene.fog.density=data.fogDensity; document.getElementById('admin-fog').value=data.fogDensity; document.getElementById('admin-fog-val').textContent=data.fogDensity; }
 }
 
 // ============ INIT GAME ============
 function initGame() {
-  // Create local player
   player = createSheep(localPlayerName, 0xf5f0e8);
   player.position.set(0, 0, 2);
   scene.add(player);
   legs = player.legs;
-
   playerShadow = player.shadowMesh;
   playerShadow.position.set(0, 0.16, 2);
   scene.add(playerShadow);
 
-  // Register in Firebase
   const playerRef = db.ref('players/' + localPlayerId);
   playerRef.set({ name: localPlayerName, x: 0, z: 2, rot: 0 });
   playerRef.onDisconnect().remove();
 
-  // ===== LISTEN: PLAYERS =====
+  // Load saved map settings
+  db.ref('mapSettings').once('value', snap => loadMapSettings(snap.val()));
+  // Listen for live map setting changes
+  db.ref('mapSettings').on('value', snap => loadMapSettings(snap.val()));
+
   db.ref('players').on('child_added', snap => {
-    const id = snap.key;
-    if (id === localPlayerId) return;
-    const data = snap.val();
-    const colors = [0xd4c4b0, 0xc4d4e0, 0xe0c4d4, 0xd4e0c4, 0xe0d4b0];
-    const ci2 = Math.abs(id.split('').reduce((a,c) => a + c.charCodeAt(0), 0)) % colors.length;
-    const remote = createSheep(data.name, colors[ci2]);
-    remote.position.set(data.x, 0, data.z);
-    scene.add(remote);
-
-    const rShadow = remote.shadowMesh;
-    rShadow.position.set(data.x, 0.16, data.z);
-    scene.add(rShadow);
-
-    remotePlayers[id] = {
-      group: remote, shadow: rShadow,
-      targetX: data.x, targetZ: data.z, targetRot: data.rot || 0,
-      legs: remote.legs, bodyMesh: remote.bodyMesh
-    };
+    const id=snap.key; if(id===localPlayerId)return;
+    const data=snap.val();
+    const colors=[0xd4c4b0,0xc4d4e0,0xe0c4d4,0xd4e0c4,0xe0d4b0];
+    const ci2=Math.abs(id.split('').reduce((a,c)=>a+c.charCodeAt(0),0))%colors.length;
+    const remote=createSheep(data.name,colors[ci2]);
+    remote.position.set(data.x,0,data.z);scene.add(remote);
+    const rShadow=remote.shadowMesh;rShadow.position.set(data.x,0.16,data.z);scene.add(rShadow);
+    remotePlayers[id]={group:remote,shadow:rShadow,targetX:data.x,targetZ:data.z,targetRot:data.rot||0,legs:remote.legs,bodyMesh:remote.bodyMesh};
     updatePlayerCount();
   });
-
   db.ref('players').on('child_changed', snap => {
-    const id = snap.key;
-    if (id === localPlayerId) return;
-    const data = snap.val();
-    if (remotePlayers[id]) {
-      remotePlayers[id].targetX = data.x;
-      remotePlayers[id].targetZ = data.z;
-      remotePlayers[id].targetRot = data.rot || 0;
-    }
+    const id=snap.key;if(id===localPlayerId)return;const data=snap.val();
+    if(remotePlayers[id]){remotePlayers[id].targetX=data.x;remotePlayers[id].targetZ=data.z;remotePlayers[id].targetRot=data.rot||0;}
   });
-
   db.ref('players').on('child_removed', snap => {
-    const id = snap.key;
-    if (remotePlayers[id]) {
-      scene.remove(remotePlayers[id].group);
-      scene.remove(remotePlayers[id].shadow);
-      delete remotePlayers[id];
-      updatePlayerCount();
-    }
+    const id=snap.key;
+    if(remotePlayers[id]){scene.remove(remotePlayers[id].group);scene.remove(remotePlayers[id].shadow);delete remotePlayers[id];updatePlayerCount();}
   });
 
-  // ===== LISTEN: CHAT =====
   db.ref('chat').orderByChild('time').limitToLast(50).on('child_added', snap => {
-    const data = snap.val();
-    const d = document.createElement('div');
-    d.style.marginTop = '6px';
-    const color = data.name === localPlayerName ? '#7ecd6a' : '#6ab8e0';
-    d.innerHTML = '<span style="color:'+color+';font-weight:600;">'+escapeHTML(data.name)+':</span> ' + escapeHTML(data.text);
-    cm.appendChild(d);
-    cm.scrollTop = cm.scrollHeight;
+    const data=snap.val();const d=document.createElement('div');d.style.marginTop='6px';
+    const color=data.name===localPlayerName?'#7ecd6a':'#6ab8e0';
+    d.innerHTML='<span style="color:'+color+';font-weight:600;">'+escapeHTML(data.name)+':</span> '+escapeHTML(data.text);
+    cm.appendChild(d);cm.scrollTop=cm.scrollHeight;
   });
 
-  // ===== LISTEN: OBJECTS =====
   db.ref('objects').on('child_added', snap => {
-    const data = snap.val();
-    const key = snap.key;
-    if (buildFactories[data.type]) {
-      const obj = buildFactories[data.type](data.x, data.z);
-      placedObjects.push(obj);
-      placedObjectsMap[key] = obj;
-    }
+    const data=snap.val(),key=snap.key;
+    if(buildFactories[data.type]){const obj=buildFactories[data.type](data.x,data.z);placedObjects.push(obj);placedObjectsMap[key]=obj;}
   });
-
   db.ref('objects').on('child_removed', snap => {
-    const key = snap.key;
-    if (placedObjectsMap[key]) {
-      scene.remove(placedObjectsMap[key]);
-      const idx = placedObjects.indexOf(placedObjectsMap[key]);
-      if (idx > -1) placedObjects.splice(idx, 1);
-      delete placedObjectsMap[key];
-    }
+    const key=snap.key;
+    if(placedObjectsMap[key]){scene.remove(placedObjectsMap[key]);const idx=placedObjects.indexOf(placedObjectsMap[key]);if(idx>-1)placedObjects.splice(idx,1);delete placedObjectsMap[key];}
   });
 
   animate();
 }
 
-function updatePlayerCount() {
-  const count = 1 + Object.keys(remotePlayers).length;
-  document.getElementById('player-count').textContent = count + (count === 1 ? ' Player' : ' Players');
+function updatePlayerCount(){
+  const count=1+Object.keys(remotePlayers).length;
+  document.getElementById('player-count').textContent=count+(count===1?' Player':' Players');
 }
 
-// ============ POSITION SYNC (throttled) ============
-let lastSyncTime = 0;
-function syncPosition() {
-  const now = Date.now();
-  if (now - lastSyncTime < 100) return;
-  lastSyncTime = now;
-  db.ref('players/' + localPlayerId).update({
-    x: player.position.x, z: player.position.z, rot: player.rotation.y
-  });
+let lastSyncTime=0;
+function syncPosition(){
+  const now=Date.now();if(now-lastSyncTime<100)return;lastSyncTime=now;
+  db.ref('players/'+localPlayerId).update({x:player.position.x,z:player.position.z,rot:player.rotation.y});
 }
 
-// ============ ANIMATE ============
-let t = 0;
-function animate() {
-  requestAnimationFrame(animate);
-  t += 0.016;
-
-  if (isMoving) {
-    const dx = targetPos.x - player.position.x, dz = targetPos.z - player.position.z;
-    if (Math.sqrt(dx*dx+dz*dz) > 0.1) {
-      player.position.x += dx*0.06;
-      player.position.z += dz*0.06;
-      player.rotation.y = Math.atan2(dx, dz);
-      player.position.y = Math.abs(Math.sin(t*8))*0.08;
-      legs.forEach((l,i) => l.rotation.x = Math.sin(t*10+i*Math.PI)*0.3);
+let t=0;
+function animate(){
+  requestAnimationFrame(animate);t+=0.016;
+  if(isMoving){
+    const dx=targetPos.x-player.position.x,dz=targetPos.z-player.position.z;
+    if(Math.sqrt(dx*dx+dz*dz)>0.1){
+      player.position.x+=dx*0.06;player.position.z+=dz*0.06;
+      player.rotation.y=Math.atan2(dx,dz);
+      player.position.y=Math.abs(Math.sin(t*8))*0.08;
+      legs.forEach((l,i)=>l.rotation.x=Math.sin(t*10+i*Math.PI)*0.3);
       syncPosition();
-    } else {
-      isMoving = false;
-      player.position.y = 0;
-      legs.forEach(l => l.rotation.x = 0);
-      syncPosition();
-    }
-  } else {
-    if (player) player.bodyMesh.scale.y = 0.9 + Math.sin(t*2)*0.02;
+    }else{isMoving=false;player.position.y=0;legs.forEach(l=>l.rotation.x=0);syncPosition();}
+  }else{if(player)player.bodyMesh.scale.y=0.9+Math.sin(t*2)*0.02;}
+  if(playerShadow){playerShadow.position.x=player.position.x;playerShadow.position.z=player.position.z;}
+
+  for(const id in remotePlayers){
+    const rp=remotePlayers[id],g=rp.group;
+    const dx=rp.targetX-g.position.x,dz=rp.targetZ-g.position.z;
+    if(Math.sqrt(dx*dx+dz*dz)>0.05){
+      g.position.x+=dx*0.08;g.position.z+=dz*0.08;
+      g.position.y=Math.abs(Math.sin(t*8))*0.08;
+      rp.legs.forEach((l,i)=>l.rotation.x=Math.sin(t*10+i*Math.PI)*0.3);
+    }else{g.position.y=0;rp.legs.forEach(l=>l.rotation.x=0);rp.bodyMesh.scale.y=0.9+Math.sin(t*2)*0.02;}
+    g.rotation.y+=(rp.targetRot-g.rotation.y)*0.1;
+    rp.shadow.position.x=g.position.x;rp.shadow.position.z=g.position.z;
   }
 
-  if (playerShadow) {
-    playerShadow.position.x = player.position.x;
-    playerShadow.position.z = player.position.z;
+  if(player){
+    const cx=player.position.x+Math.sin(camA)*camD*Math.cos(camP);
+    const cy=Math.sin(camP)*camD;
+    const cz=player.position.z+Math.cos(camA)*camD*Math.cos(camP);
+    camera.position.lerp(new THREE.Vector3(cx,cy,cz),0.05);
+    camera.lookAt(new THREE.Vector3(player.position.x,1,player.position.z));
   }
-
-  // Remote players lerp
-  for (const id in remotePlayers) {
-    const rp = remotePlayers[id];
-    const g = rp.group;
-    const dx = rp.targetX - g.position.x;
-    const dz = rp.targetZ - g.position.z;
-    const dist = Math.sqrt(dx*dx + dz*dz);
-    if (dist > 0.05) {
-      g.position.x += dx * 0.08;
-      g.position.z += dz * 0.08;
-      g.position.y = Math.abs(Math.sin(t*8)) * 0.08;
-      rp.legs.forEach((l,i) => l.rotation.x = Math.sin(t*10+i*Math.PI)*0.3);
-    } else {
-      g.position.y = 0;
-      rp.legs.forEach(l => l.rotation.x = 0);
-      rp.bodyMesh.scale.y = 0.9 + Math.sin(t*2)*0.02;
-    }
-    g.rotation.y += (rp.targetRot - g.rotation.y) * 0.1;
-    rp.shadow.position.x = g.position.x;
-    rp.shadow.position.z = g.position.z;
-  }
-
-  // Camera
-  if (player) {
-    const cx = player.position.x + Math.sin(camA)*camD*Math.cos(camP);
-    const cy = Math.sin(camP)*camD;
-    const cz = player.position.z + Math.cos(camA)*camD*Math.cos(camP);
-    camera.position.lerp(new THREE.Vector3(cx, cy, cz), 0.05);
-    camera.lookAt(new THREE.Vector3(player.position.x, 1, player.position.z));
-  }
-  renderer.render(scene, camera);
+  renderer.render(scene,camera);
 }
 
-addEventListener('resize', () => {
-  camera.aspect = innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-});
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 </script>
 </body>
 </html>
