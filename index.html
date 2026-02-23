@@ -35,6 +35,52 @@
   #loading-text { color: #4a6a40; font-size: 16px; margin-top: 16px; }
   #loading-bar-bg { width: 200px; height: 6px; background: rgba(74,106,64,0.2); border-radius: 3px; margin-top: 10px; }
   #loading-bar { height: 100%; width: 0%; background: #7ecd6a; border-radius: 3px; transition: width 0.3s; }
+
+  #build-btn {
+    position: fixed; bottom: 16px; left: 16px; z-index: 10;
+    background: rgba(45,65,45,0.88); backdrop-filter: blur(10px);
+    color: #e8f0e4; border: none; border-radius: 14px; padding: 10px 18px;
+    font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;
+    transition: background 0.2s;
+  }
+  #build-btn:hover { background: rgba(55,80,55,0.92); }
+  #build-btn .key-hint { background: rgba(255,255,255,0.1); padding: 2px 7px; border-radius: 6px; font-size: 11px; font-weight: 400; }
+
+  #build-panel {
+    position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    width: 320px; z-index: 20;
+    background: rgba(45,65,45,0.92); backdrop-filter: blur(12px);
+    border-radius: 16px; overflow: hidden; display: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  #build-panel.open { display: block; }
+  #build-panel-header {
+    padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(126,205,106,0.15);
+  }
+  #build-panel-header span { font-size: 12px; font-weight: 600; color: #7ecd6a; letter-spacing: 1.5px; text-transform: uppercase; }
+  #build-close {
+    background: rgba(255,255,255,0.08); border: none; color: #c8d8c4; font-size: 16px;
+    width: 28px; height: 28px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  #build-close:hover { background: rgba(255,255,255,0.15); }
+  #build-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; }
+  .build-slot {
+    background: rgba(255,255,255,0.06); border: 2px solid transparent; border-radius: 12px;
+    padding: 14px 10px; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  }
+  .build-slot:hover { background: rgba(255,255,255,0.1); border-color: rgba(126,205,106,0.3); }
+  .build-slot.selected { border-color: #7ecd6a; background: rgba(126,205,106,0.12); }
+  .build-slot .slot-icon { font-size: 28px; display: block; margin-bottom: 6px; }
+  .build-slot .slot-label { font-size: 12px; color: #e8f0e4; font-weight: 500; }
+
+  #placement-hint {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); z-index: 15;
+    background: rgba(45,65,45,0.9); backdrop-filter: blur(8px);
+    color: #c8d8c4; padding: 8px 18px; border-radius: 20px; font-size: 12px;
+    display: none; white-space: nowrap;
+  }
+  #placement-hint.visible { display: block; }
 </style>
 </head>
 <body>
@@ -56,6 +102,20 @@
     <button id="chat-send"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
   </div>
 </div>
+<button id="build-btn">🔨 Build <span class="key-hint">B</span></button>
+<div id="build-panel">
+  <div id="build-panel-header">
+    <span>🔨 BUILD / BUY</span>
+    <button id="build-close">&times;</button>
+  </div>
+  <div id="build-items">
+    <div class="build-slot" data-item="tree"><span class="slot-icon">🌲</span><span class="slot-label">Tree</span></div>
+    <div class="build-slot" data-item="grass"><span class="slot-icon">🌿</span><span class="slot-label">Grass Tuft</span></div>
+    <div class="build-slot" data-item="flower"><span class="slot-icon">🌸</span><span class="slot-label">Flower</span></div>
+    <div class="build-slot" data-item="fence"><span class="slot-icon">🪵</span><span class="slot-label">Fence Post</span></div>
+  </div>
+</div>
+<div id="placement-hint">Click ground to place · Right-click or Esc to cancel</div>
 <div id="click-indicator"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -150,13 +210,13 @@ function mkRound(x,z,s){
 }
 
 // ============ LOAD GLB TREES FROM GITHUB ============
-const TREE_URL = 'stylized_pine_tree_tree.glb'; // relative path (same folder)
+const TREE_URL = 'stylized_pine_tree_tree.glb';
 const loadBar = document.getElementById('loading-bar');
+let loadedTreeModel = null;
 
 const gltfLoader = new THREE.GLTFLoader();
 gltfLoader.load(
   TREE_URL,
-  // Success
   (gltf) => {
     const treeModel = gltf.scene;
     treeModel.traverse(child => {
@@ -166,7 +226,8 @@ gltfLoader.load(
       }
     });
 
-    // Place trees at these positions (adjust scale if needed)
+    loadedTreeModel = treeModel;
+
     const treePositions = [
       { x: -4, z: -3, scale: 0.02 },
       { x: -3, z: 3, scale: 0.015 },
@@ -257,6 +318,65 @@ player.position.set(0,0,2);scene.add(player);
 const ps=new THREE.Mesh(new THREE.CircleGeometry(0.5,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.12}));
 ps.rotation.x=-Math.PI/2;ps.position.set(0,0.16,2);scene.add(ps);
 
+// ============ BUILD / BUY SYSTEM ============
+let selectedBuildItem = null;
+
+function placeTree(x, z) {
+  if (loadedTreeModel) {
+    const tree = loadedTreeModel.clone();
+    tree.position.set(x, 0.15, z);
+    tree.scale.setScalar(0.02);
+    scene.add(tree);
+  } else {
+    mkPine(x, z, 0.02);
+  }
+}
+function placeGrassTuft(x, z) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(0.15,0.3,0.15), new THREE.MeshLambertMaterial({color:0x8cc47a}));
+  m.position.set(x, 0.25, z); m.castShadow = true; scene.add(m);
+}
+function placeFlower(x, z) {
+  const fg = new THREE.Group();
+  const st = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.4,4), new THREE.MeshLambertMaterial({color:0x6aaa55}));
+  st.position.y = 0.2; fg.add(st);
+  const cs = [0xf5a0b0, 0xf0d060, 0xffffff, 0xc8a0f0];
+  const pt = new THREE.Mesh(new THREE.SphereGeometry(0.12,6,4), new THREE.MeshLambertMaterial({color:cs[Math.floor(Math.random()*4)]}));
+  pt.position.y = 0.45; fg.add(pt);
+  fg.position.set(x, 0, z); scene.add(fg);
+}
+function placeFencePost(x, z) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(0.15,0.8,0.15), new THREE.MeshLambertMaterial({color:0xc4a46a}));
+  m.position.set(x, 0.4, z); m.castShadow = true; scene.add(m);
+}
+
+const buildFactories = { tree: placeTree, grass: placeGrassTuft, flower: placeFlower, fence: placeFencePost };
+
+function updateBuildUI() {
+  document.querySelectorAll('.build-slot').forEach(s => s.classList.toggle('selected', s.dataset.item === selectedBuildItem));
+  document.getElementById('placement-hint').classList.toggle('visible', selectedBuildItem !== null);
+}
+function cancelBuild() { selectedBuildItem = null; updateBuildUI(); }
+
+const buildPanel = document.getElementById('build-panel');
+document.getElementById('build-btn').addEventListener('click', () => {
+  buildPanel.classList.toggle('open');
+  if (!buildPanel.classList.contains('open')) cancelBuild();
+});
+document.getElementById('build-close').addEventListener('click', () => { buildPanel.classList.remove('open'); cancelBuild(); });
+document.querySelectorAll('.build-slot').forEach(slot => {
+  slot.addEventListener('click', () => {
+    selectedBuildItem = slot.dataset.item;
+    updateBuildUI();
+    buildPanel.classList.remove('open');
+  });
+});
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'b' || e.key === 'B') { buildPanel.classList.toggle('open'); if (!buildPanel.classList.contains('open')) cancelBuild(); }
+  if (e.key === 'Escape') { buildPanel.classList.remove('open'); cancelBuild(); }
+});
+renderer.domElement.addEventListener('contextmenu', e => { e.preventDefault(); cancelBuild(); });
+
 // Movement
 let targetPos=new THREE.Vector3(0,0,2),isMoving=false;
 const ray=new THREE.Raycaster(),mss=new THREE.Vector2();
@@ -265,7 +385,14 @@ renderer.domElement.addEventListener('click',e=>{
   mss.x=(e.clientX/innerWidth)*2-1; mss.y=-(e.clientY/innerHeight)*2+1;
   ray.setFromCamera(mss,camera);
   const h=ray.intersectObject(ground);
-  if(h.length){targetPos.copy(h[0].point);targetPos.y=0;isMoving=true;
+  if(h.length){
+    if (selectedBuildItem) {
+      const pt = h[0].point;
+      buildFactories[selectedBuildItem](pt.x, pt.z);
+      cancelBuild();
+      return;
+    }
+    targetPos.copy(h[0].point);targetPos.y=0;isMoving=true;
     const ind=document.getElementById('click-indicator');
     ind.style.left=e.clientX+'px';ind.style.top=e.clientY+'px';
     ind.classList.remove('active');void ind.offsetWidth;ind.classList.add('active');
