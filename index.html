@@ -835,6 +835,7 @@ renderer.domElement.addEventListener('click',e=>{
   }
 
   // Demolish mode
+  if(demolishMode){
     let allMeshes=[];
     placedObjects.forEach(obj=>{
       if(obj.isMesh){allMeshes.push({mesh:obj,root:obj});}
