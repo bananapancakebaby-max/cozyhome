@@ -216,7 +216,7 @@ scene.background = new THREE.Color(0xd4e4d0);
 scene.fog = new THREE.FogExp2(0xd4e4d0, 0.012);
 
 const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 200);
-camera.position.set(14, 14, 14);
+camera.position.set(14, 18, 14);
 camera.lookAt(0,0,0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -480,7 +480,7 @@ renderer.domElement.addEventListener('click',e=>{
 });
 
 // ============ CAMERA ============
-let isDrag=false,pmx=0,pmy=0,camA=Math.PI/4,camP=0.5,camD=14;
+let isDrag=false,pmx=0,pmy=0,camA=Math.PI/4,camP=0.8,camD=18;
 renderer.domElement.addEventListener('mousedown',e=>{isDrag=false;pmx=e.clientX;pmy=e.clientY;});
 renderer.domElement.addEventListener('mousemove',e=>{
   if(e.buttons!==1)return;
