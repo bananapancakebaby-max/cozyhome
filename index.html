@@ -483,6 +483,10 @@ let localPlayerName = '';
 const nameInput = document.getElementById('name-input');
 const joinBtn = document.getElementById('join-btn');
 nameInput.addEventListener('input', () => { joinBtn.disabled = nameInput.value.trim().length === 0; });
+nameInput.addEventListener('keyup', () => { joinBtn.disabled = nameInput.value.trim().length === 0; });
+nameInput.addEventListener('change', () => { joinBtn.disabled = nameInput.value.trim().length === 0; });
+// Also check after a short delay (for autofill)
+setTimeout(() => { joinBtn.disabled = nameInput.value.trim().length === 0; }, 500);
 nameInput.addEventListener('keydown', e => { if (e.key === 'Enter' && nameInput.value.trim()) startGame(); });
 joinBtn.addEventListener('click', startGame);
 
