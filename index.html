@@ -36,7 +36,6 @@
     cursor: pointer; transition: background 0.2s;
   }
   #join-btn:hover { background: #6bba58; }
-  #join-btn:disabled { background: #5a8a50; cursor: not-allowed; opacity: 0.6; }
 
   /* ===== GAME UI ===== */
   #game-ui { display: none; }
@@ -254,7 +253,7 @@
     <h1>Cozy Farm World</h1>
     <p>Enter your name to join the farm!</p>
     <input type="text" id="name-input" placeholder="Your name..." maxlength="12" />
-    <button id="join-btn" disabled>Join Farm 🌾</button>
+    <button id="join-btn">Join Farm 🌾</button>
   </div>
 </div>
 
@@ -482,12 +481,7 @@ let localPlayerName = '';
 // ============ LOGIN ============
 const nameInput = document.getElementById('name-input');
 const joinBtn = document.getElementById('join-btn');
-nameInput.addEventListener('input', () => { joinBtn.disabled = nameInput.value.trim().length === 0; });
-nameInput.addEventListener('keyup', () => { joinBtn.disabled = nameInput.value.trim().length === 0; });
-nameInput.addEventListener('change', () => { joinBtn.disabled = nameInput.value.trim().length === 0; });
-// Also check after a short delay (for autofill)
-setTimeout(() => { joinBtn.disabled = nameInput.value.trim().length === 0; }, 500);
-nameInput.addEventListener('keydown', e => { if (e.key === 'Enter' && nameInput.value.trim()) startGame(); });
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') startGame(); });
 joinBtn.addEventListener('click', startGame);
 
 function startGame() {
