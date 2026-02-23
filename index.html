@@ -190,6 +190,24 @@
     font-size: 11px; color: #c8d8c4; transition: all 0.15s;
   }
   .admin-preset:hover { background: rgba(255,255,255,0.12); border-color: #7ecd6a; }
+
+  .admin-select {
+    width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(126,205,106,0.3);
+    border-radius: 8px; padding: 8px 10px; color: #e8f0e4; font-size: 12px; outline: none;
+    margin-bottom: 10px; cursor: pointer;
+  }
+  .admin-select option { background: #2d412d; color: #e8f0e4; }
+  .admin-code-box {
+    background: rgba(0,0,0,0.3); border: 1px solid rgba(126,205,106,0.2);
+    border-radius: 8px; padding: 10px; font-family: 'Courier New', monospace;
+    font-size: 10px; color: #7ecd6a; word-break: break-all; max-height: 120px;
+    overflow-y: auto; margin-top: 8px; display: none; user-select: all;
+  }
+  .admin-code-box.visible { display: block; }
+  .admin-row-tight { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .admin-row-tight label { color: #c8d8c4; font-size: 11px; font-weight: 500; }
+  .admin-slider-sm { width: 110px; accent-color: #7ecd6a; cursor: pointer; }
+  .admin-value-sm { color: #7ecd6a; font-size: 10px; font-weight: 600; min-width: 44px; text-align: right; }
 </style>
 </head>
 <body>
@@ -325,6 +343,58 @@
     <button class="admin-btn" id="admin-add-pond">Add Pond</button>
     <button class="admin-btn" id="admin-add-flowers">Add Flower Patch (8)</button>
     <button class="admin-btn danger" id="admin-clear-all" style="margin-top:8px;">Clear All Placed Objects</button>
+  </div>
+
+  <!-- ASSET EDITOR -->
+  <div class="admin-section">
+    <div class="admin-section-title">📦 Asset Editor</div>
+    <p style="color:rgba(200,216,196,0.5);font-size:10px;margin-bottom:10px;">Import a GLB, tweak scale/position live, then copy the final values.</p>
+
+    <label style="color:#c8d8c4;font-size:11px;display:block;margin-bottom:4px;">Select asset to edit:</label>
+    <select class="admin-select" id="asset-select">
+      <option value="tree">🌲 Tree (stylized_pine_tree_tree.glb)</option>
+      <option value="custom">📁 Load custom GLB from assets/...</option>
+    </select>
+    <div id="asset-custom-input" style="display:none;margin-bottom:10px;">
+      <input type="text" id="asset-custom-path" placeholder="e.g. character.glb" style="width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(126,205,106,0.3);border-radius:8px;padding:8px 10px;color:#e8f0e4;font-size:12px;outline:none;">
+      <button class="admin-btn" id="asset-custom-load" style="margin-top:6px;">Load GLB</button>
+    </div>
+
+    <button class="admin-btn" id="asset-spawn">Spawn Asset on Map</button>
+
+    <div id="asset-editor-controls" style="display:none;margin-top:12px;">
+      <div class="admin-section-title" style="color:#7ecd6a;">🎛️ Live Adjustments</div>
+
+      <div class="admin-row-tight">
+        <label>Scale</label>
+        <input type="range" class="admin-slider-sm" id="asset-scale" min="0.001" max="0.2" value="0.02" step="0.001">
+        <span class="admin-value-sm" id="asset-scale-val">0.020</span>
+      </div>
+      <div class="admin-row-tight">
+        <label>Pos X</label>
+        <input type="range" class="admin-slider-sm" id="asset-pos-x" min="-20" max="20" value="0" step="0.25">
+        <span class="admin-value-sm" id="asset-pos-x-val">0.00</span>
+      </div>
+      <div class="admin-row-tight">
+        <label>Pos Y</label>
+        <input type="range" class="admin-slider-sm" id="asset-pos-y" min="-2" max="5" value="0.15" step="0.05">
+        <span class="admin-value-sm" id="asset-pos-y-val">0.15</span>
+      </div>
+      <div class="admin-row-tight">
+        <label>Pos Z</label>
+        <input type="range" class="admin-slider-sm" id="asset-pos-z" min="-20" max="20" value="0" step="0.25">
+        <span class="admin-value-sm" id="asset-pos-z-val">0.00</span>
+      </div>
+      <div class="admin-row-tight">
+        <label>Rotation Y</label>
+        <input type="range" class="admin-slider-sm" id="asset-rot-y" min="0" max="6.28" value="0" step="0.1">
+        <span class="admin-value-sm" id="asset-rot-y-val">0.0</span>
+      </div>
+
+      <button class="admin-btn" id="asset-copy-values" style="margin-top:8px;">📋 Copy Values as Code</button>
+      <button class="admin-btn danger" id="asset-remove">Remove Preview Asset</button>
+      <div class="admin-code-box" id="asset-code-output"></div>
+    </div>
   </div>
 
   <!-- SAVE -->
@@ -883,6 +953,138 @@ function loadMapSettings(data) {
   if(data.lightColor) { dl.color.set(data.lightColor); document.getElementById('admin-light-color').value=data.lightColor; }
   if(data.fogDensity!==undefined) { scene.fog.density=data.fogDensity; document.getElementById('admin-fog').value=data.fogDensity; document.getElementById('admin-fog-val').textContent=data.fogDensity; }
 }
+
+// ============ ASSET EDITOR ============
+let previewAsset = null;
+let previewAssetPath = '';
+const assetEditorLoader = new THREE.GLTFLoader();
+
+// Show/hide custom path input
+document.getElementById('asset-select').addEventListener('change', e => {
+  document.getElementById('asset-custom-input').style.display = e.target.value === 'custom' ? 'block' : 'none';
+});
+
+// Load custom GLB
+document.getElementById('asset-custom-load').addEventListener('click', () => {
+  const filename = document.getElementById('asset-custom-path').value.trim();
+  if (!filename) return;
+  previewAssetPath = 'assets/' + filename;
+  loadPreviewAsset(previewAssetPath);
+});
+
+// Spawn asset
+document.getElementById('asset-spawn').addEventListener('click', () => {
+  const sel = document.getElementById('asset-select').value;
+  if (sel === 'tree') {
+    previewAssetPath = TREE_URL;
+    loadPreviewAsset(previewAssetPath);
+  } else if (sel === 'custom') {
+    const filename = document.getElementById('asset-custom-path').value.trim();
+    if (!filename) { alert('Enter a GLB filename first!'); return; }
+    previewAssetPath = 'assets/' + filename;
+    loadPreviewAsset(previewAssetPath);
+  }
+});
+
+function loadPreviewAsset(url) {
+  // Remove old preview
+  if (previewAsset) { scene.remove(previewAsset); previewAsset = null; }
+
+  const spawnBtn = document.getElementById('asset-spawn');
+  spawnBtn.textContent = '⏳ Loading...';
+  spawnBtn.disabled = true;
+
+  assetEditorLoader.load(url,
+    (gltf) => {
+      previewAsset = gltf.scene;
+      previewAsset.traverse(child => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; }});
+
+      // Set initial values from sliders
+      const s = parseFloat(document.getElementById('asset-scale').value);
+      previewAsset.scale.setScalar(s);
+      previewAsset.position.set(
+        parseFloat(document.getElementById('asset-pos-x').value),
+        parseFloat(document.getElementById('asset-pos-y').value),
+        parseFloat(document.getElementById('asset-pos-z').value)
+      );
+      previewAsset.rotation.y = parseFloat(document.getElementById('asset-rot-y').value);
+      scene.add(previewAsset);
+
+      // Show editor controls
+      document.getElementById('asset-editor-controls').style.display = 'block';
+      spawnBtn.textContent = 'Spawn Asset on Map';
+      spawnBtn.disabled = false;
+      console.log('Preview asset loaded:', url);
+    },
+    null,
+    (err) => {
+      alert('Failed to load GLB! Make sure the file is in your assets/ folder on GitHub.\n\nPath tried: ' + url);
+      spawnBtn.textContent = 'Spawn Asset on Map';
+      spawnBtn.disabled = false;
+      console.error('Asset load error:', err);
+    }
+  );
+}
+
+// Live slider updates
+['scale','pos-x','pos-y','pos-z','rot-y'].forEach(key => {
+  const slider = document.getElementById('asset-' + key);
+  const valSpan = document.getElementById('asset-' + key + '-val');
+  slider.addEventListener('input', () => {
+    const v = parseFloat(slider.value);
+    if (key === 'scale') {
+      valSpan.textContent = v.toFixed(3);
+      if (previewAsset) previewAsset.scale.setScalar(v);
+    } else if (key === 'pos-x') {
+      valSpan.textContent = v.toFixed(2);
+      if (previewAsset) previewAsset.position.x = v;
+    } else if (key === 'pos-y') {
+      valSpan.textContent = v.toFixed(2);
+      if (previewAsset) previewAsset.position.y = v;
+    } else if (key === 'pos-z') {
+      valSpan.textContent = v.toFixed(2);
+      if (previewAsset) previewAsset.position.z = v;
+    } else if (key === 'rot-y') {
+      valSpan.textContent = v.toFixed(1);
+      if (previewAsset) previewAsset.rotation.y = v;
+    }
+  });
+});
+
+// Copy values as code
+document.getElementById('asset-copy-values').addEventListener('click', () => {
+  if (!previewAsset) return;
+  const code =
+`// Asset: ${previewAssetPath}
+scale: ${previewAsset.scale.x.toFixed(4)}
+position: { x: ${previewAsset.position.x.toFixed(2)}, y: ${previewAsset.position.y.toFixed(2)}, z: ${previewAsset.position.z.toFixed(2)} }
+rotation.y: ${previewAsset.rotation.y.toFixed(2)}
+
+// Three.js code:
+model.scale.setScalar(${previewAsset.scale.x.toFixed(4)});
+model.position.set(${previewAsset.position.x.toFixed(2)}, ${previewAsset.position.y.toFixed(2)}, ${previewAsset.position.z.toFixed(2)});
+model.rotation.y = ${previewAsset.rotation.y.toFixed(2)};`;
+
+  const codeBox = document.getElementById('asset-code-output');
+  codeBox.textContent = code;
+  codeBox.classList.add('visible');
+
+  // Also copy to clipboard
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById('asset-copy-values');
+    btn.textContent = '✅ Copied to clipboard!';
+    setTimeout(() => btn.textContent = '📋 Copy Values as Code', 2000);
+  }).catch(() => {
+    // Clipboard might not work, that's ok - code box is visible
+  });
+});
+
+// Remove preview
+document.getElementById('asset-remove').addEventListener('click', () => {
+  if (previewAsset) { scene.remove(previewAsset); previewAsset = null; }
+  document.getElementById('asset-editor-controls').style.display = 'none';
+  document.getElementById('asset-code-output').classList.remove('visible');
+});
 
 // ============ INIT GAME ============
 function initGame() {
