@@ -8,40 +8,9 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { overflow: hidden; background: #d4e4d0; font-family: 'Segoe UI', sans-serif; }
   canvas { display: block; }
-
-  /* LOGIN */
-  #login-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: #d4e4d0; z-index: 200;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-  }
-  #login-box {
-    background: rgba(45,65,45,0.92); backdrop-filter: blur(12px);
-    border-radius: 20px; padding: 40px 36px; text-align: center;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2); min-width: 300px;
-  }
-  #login-box h1 { color: #7ecd6a; font-size: 24px; margin-bottom: 4px; }
-  #login-box p { color: #c8d8c4; font-size: 13px; margin-bottom: 24px; }
-  #login-box .farm-emoji { font-size: 48px; margin-bottom: 16px; display: block; }
-  #name-input {
-    width: 100%; background: rgba(255,255,255,0.08); border: 2px solid rgba(126,205,106,0.3);
-    border-radius: 12px; padding: 12px 16px; color: #e8f0e4; font-size: 14px; outline: none;
-    text-align: center; margin-bottom: 16px;
-  }
-  #name-input:focus { border-color: #7ecd6a; }
-  #name-input::placeholder { color: rgba(200,216,196,0.4); }
-  #join-btn {
-    width: 100%; background: #7ecd6a; border: none; border-radius: 12px;
-    padding: 12px; color: #2d412d; font-size: 14px; font-weight: 700;
-    cursor: pointer; transition: background 0.2s;
-  }
-  #join-btn:hover { background: #6bba58; }
-
-  /* GAME UI */
-  #game-ui { display: none; }
   #ui-overlay { position: fixed; top: 16px; left: 16px; z-index: 10; }
   #player-badge {
-    background: rgba(45,65,45,0.85); backdrop-filter: blur(8px);
+    background: rgba(45, 65, 45, 0.85); backdrop-filter: blur(8px);
     color: #e8f0e4; padding: 8px 16px; border-radius: 20px; font-size: 13px;
     display: flex; align-items: center; gap: 8px;
   }
@@ -67,16 +36,15 @@
   #loading-bar-bg { width: 200px; height: 6px; background: rgba(74,106,64,0.2); border-radius: 3px; margin-top: 10px; }
   #loading-bar { height: 100%; width: 0%; background: #7ecd6a; border-radius: 3px; transition: width 0.3s; }
 
-  #bottom-buttons { position: fixed; bottom: 16px; left: 16px; z-index: 10; display: flex; gap: 8px; }
-  .action-btn {
+  #build-btn {
+    position: fixed; bottom: 16px; left: 16px; z-index: 10;
     background: rgba(45,65,45,0.88); backdrop-filter: blur(10px);
     color: #e8f0e4; border: none; border-radius: 14px; padding: 10px 18px;
     font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;
-    transition: background 0.2s; border: 2px solid transparent;
+    transition: background 0.2s;
   }
-  .action-btn:hover { background: rgba(55,80,55,0.92); }
-  .action-btn.active { border-color: #e85a5a; background: rgba(80,45,45,0.88); }
-  .action-btn .key-hint { background: rgba(255,255,255,0.1); padding: 2px 7px; border-radius: 6px; font-size: 11px; font-weight: 400; }
+  #build-btn:hover { background: rgba(55,80,55,0.92); }
+  #build-btn .key-hint { background: rgba(255,255,255,0.1); padding: 2px 7px; border-radius: 6px; font-size: 11px; font-weight: 400; }
 
   #build-panel {
     position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%);
@@ -119,10 +87,46 @@
     color: #f0c8c8; padding: 8px 18px; border-radius: 20px; font-size: 12px;
     display: none; white-space: nowrap;
   }
+  #login-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #d4e4d0; z-index: 200;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  #login-box {
+    background: rgba(45,65,45,0.92); backdrop-filter: blur(12px);
+    border-radius: 20px; padding: 40px 36px; text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2); min-width: 300px;
+  }
+  #login-box h1 { color: #7ecd6a; font-size: 24px; margin-bottom: 4px; }
+  #login-box p { color: #c8d8c4; font-size: 13px; margin-bottom: 24px; }
+  #login-box .farm-emoji { font-size: 48px; margin-bottom: 16px; display: block; }
+  #name-input {
+    width: 100%; background: rgba(255,255,255,0.08); border: 2px solid rgba(126,205,106,0.3);
+    border-radius: 12px; padding: 12px 16px; color: #e8f0e4; font-size: 14px; outline: none;
+    text-align: center; margin-bottom: 16px;
+  }
+  #name-input:focus { border-color: #7ecd6a; }
+  #name-input::placeholder { color: rgba(200,216,196,0.4); }
+  #join-btn {
+    width: 100%; background: #7ecd6a; border: none; border-radius: 12px;
+    padding: 12px; color: #2d412d; font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  #join-btn:hover { background: #6bba58; }
+  #game-wrap { display: none; }
+  #bottom-buttons { position: fixed; bottom: 16px; left: 16px; z-index: 10; display: flex; gap: 8px; }
+  .action-btn {
+    background: rgba(45,65,45,0.88); backdrop-filter: blur(10px);
+    color: #e8f0e4; border: none; border-radius: 14px; padding: 10px 18px;
+    font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;
+    transition: background 0.2s; border: 2px solid transparent;
+  }
+  .action-btn:hover { background: rgba(55,80,55,0.92); }
+  .action-btn.active { border-color: #e85a5a; background: rgba(80,45,45,0.88); }
+  .action-btn .key-hint { background: rgba(255,255,255,0.1); padding: 2px 7px; border-radius: 6px; font-size: 11px; }
 </style>
 </head>
 <body>
-
+<!-- LOGIN -->
 <div id="login-screen">
   <div id="login-box">
     <span class="farm-emoji">🌿🏠🐑</span>
@@ -132,46 +136,45 @@
     <button id="join-btn">Join Farm 🌾</button>
   </div>
 </div>
-
-<div id="loading" style="display:none;">
+<div id="game-wrap">
+<div id="loading">
   <div id="loading-text">Loading farm... 🌿</div>
   <div id="loading-bar-bg"><div id="loading-bar"></div></div>
 </div>
-
-<div id="game-ui">
-  <div id="ui-overlay"><div id="player-badge"><span class="dot"></span><span>ONLINE · <strong id="player-count">1 Player</strong></span></div></div>
-  <div id="controls-hint">
-    <div class="hint-pill">🖱 Click ground to move</div>
-    <div class="hint-pill">↔ Drag to rotate camera</div>
-    <div class="hint-pill">🔍 Scroll to zoom</div>
-  </div>
-  <div id="chat-box">
-    <div id="chat-header">💬 FARM CHAT</div>
-    <div id="chat-messages"><div style="opacity:0.5;font-style:italic;">Welcome to the farm! 🌿</div></div>
-    <div id="chat-input-row">
-      <input type="text" id="chat-input" placeholder="Type a message..." />
-      <button id="chat-send"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
-    </div>
-  </div>
-  <div id="bottom-buttons">
-    <button class="action-btn" id="build-btn">🔨 Build <span class="key-hint">B</span></button>
-    <button class="action-btn" id="demolish-btn">🚧 Demolish <span class="key-hint">X</span></button>
-  </div>
-  <div id="build-panel">
-    <div id="build-panel-header">
-      <span>🔨 BUILD / BUY</span>
-      <button id="build-close">&times;</button>
-    </div>
-    <div id="build-items">
-      <div class="build-slot" data-item="tree"><span class="slot-icon">🌲</span><span class="slot-label">Tree</span></div>
-      <div class="build-slot" data-item="grass"><span class="slot-icon">🌿</span><span class="slot-label">Grass Tuft</span></div>
-      <div class="build-slot" data-item="flower"><span class="slot-icon">🌸</span><span class="slot-label">Flower</span></div>
-      <div class="build-slot" data-item="fence"><span class="slot-icon">🪵</span><span class="slot-label">Fence Post</span></div>
-    </div>
-  </div>
-  <div id="placement-hint">Click ground to place · Right-click or Esc to cancel</div>
-  <div id="demolish-hint">Click a placed object to remove it · Right-click or Esc to cancel</div>
+<div id="ui-overlay"><div id="player-badge"><span class="dot"></span><span>ONLINE · <strong id="player-count">1 Player</strong></span></div></div>
+<div id="controls-hint">
+  <div class="hint-pill" style="opacity:0.5;font-size:10px;">v1.2</div>
+  <div class="hint-pill">🖱 Click ground to move</div>
+  <div class="hint-pill">↔ Drag to rotate camera</div>
+  <div class="hint-pill">🔍 Scroll to zoom</div>
 </div>
+<div id="chat-box">
+  <div id="chat-header">💬 FARM CHAT</div>
+  <div id="chat-messages"><div style="opacity:0.5;font-style:italic;">Welcome to the farm! 🌿</div></div>
+  <div id="chat-input-row">
+    <input type="text" id="chat-input" placeholder="Type a message..." />
+    <button id="chat-send"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+  </div>
+</div>
+<div id="bottom-buttons">
+  <button class="action-btn" id="build-btn">🔨 Build <span class="key-hint">B</span></button>
+  <button class="action-btn" id="demolish-btn">🚧 Demolish <span class="key-hint">X</span></button>
+</div>
+<div id="build-panel">
+  <div id="build-panel-header">
+    <span>🔨 BUILD / BUY</span>
+    <button id="build-close">&times;</button>
+  </div>
+  <div id="build-items">
+    <div class="build-slot" data-item="tree"><span class="slot-icon">🌲</span><span class="slot-label">Tree</span></div>
+    <div class="build-slot" data-item="grass"><span class="slot-icon">🌿</span><span class="slot-label">Grass Tuft</span></div>
+    <div class="build-slot" data-item="flower"><span class="slot-icon">🌸</span><span class="slot-label">Flower</span></div>
+    <div class="build-slot" data-item="fence"><span class="slot-icon">🪵</span><span class="slot-label">Fence Post</span></div>
+  </div>
+</div>
+<div id="placement-hint">Click ground to place · Right-click or Esc to cancel</div>
+<div id="demolish-hint">Click a placed object to remove it · Esc to cancel</div>
+</div><!-- /game-wrap -->
 <div id="click-indicator"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -205,18 +208,17 @@ function startGame() {
   localPlayerName = nameInput.value.trim();
   if (!localPlayerName) return;
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('loading').style.display = 'flex';
-  document.getElementById('game-ui').style.display = 'block';
+  document.getElementById('game-wrap').style.display = 'block';
   initGame();
 }
 
-// ============ THREE.JS SCENE ============
+// ============ SCENE (exact original) ============
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xd4e4d0);
 scene.fog = new THREE.FogExp2(0xd4e4d0, 0.012);
 
 const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 200);
-camera.position.set(10, 14, 10);
+camera.position.set(14, 14, 14);
 camera.lookAt(0,0,0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -236,9 +238,10 @@ dl.shadow.camera.left=-20; dl.shadow.camera.right=20;
 dl.shadow.camera.top=20; dl.shadow.camera.bottom=-20;
 dl.shadow.bias=-0.001;
 scene.add(dl);
-scene.add(new THREE.DirectionalLight(0xc8e0ff, 0.3)).position.set(-8,10,-6);
+const fl = new THREE.DirectionalLight(0xc8e0ff, 0.3);
+fl.position.set(-8,10,-6); scene.add(fl);
 
-// Ground
+// Ground slab (exact original)
 const gg = new THREE.Group();
 const gt = new THREE.Mesh(new THREE.BoxGeometry(12,0.3,12), new THREE.MeshLambertMaterial({color:0xa8d89a}));
 gt.receiveShadow=true; gg.add(gt);
@@ -259,7 +262,7 @@ for(let i=0;i<15;i++){
   t.position.set((Math.random()-0.5)*10,0.25,(Math.random()-0.5)*10); t.castShadow=true; scene.add(t);
 }
 
-// Farmhouse
+// Farmhouse (exact original)
 function mkHouse(x,z){
   const g=new THREE.Group();
   const b=new THREE.Mesh(new THREE.BoxGeometry(4,3,3.5),new THREE.MeshLambertMaterial({color:0xe8675a}));
@@ -270,8 +273,8 @@ function mkHouse(x,z){
   d.position.set(0,0.8,1.76);g.add(d);
   const wm=new THREE.MeshLambertMaterial({color:0xfff4b8});
   const wg=new THREE.BoxGeometry(0.7,0.7,0.1);
-  g.add(new THREE.Mesh(wg,wm)).position.set(-1.2,2,1.76);
-  g.add(new THREE.Mesh(wg,wm)).position.set(1.2,2,1.76);
+  const w1=new THREE.Mesh(wg,wm);w1.position.set(-1.2,2,1.76);g.add(w1);
+  const w2=new THREE.Mesh(wg,wm);w2.position.set(1.2,2,1.76);g.add(w2);
   const c=new THREE.Mesh(new THREE.BoxGeometry(0.6,1.5,0.6),new THREE.MeshLambertMaterial({color:0x8b6050}));
   c.position.set(1.2,4.5,-0.5);c.castShadow=true;g.add(c);
   g.position.set(x,0,z);scene.add(g);
@@ -287,7 +290,7 @@ function mkPine(x,z,s){
     const f=new THREE.Mesh(new THREE.ConeGeometry(sz*s*0.6,1.4*s,6),new THREE.MeshLambertMaterial({color:c}));
     f.position.y=h*s;f.castShadow=true;g.add(f);
   });
-  g.position.set(x,0,z);scene.add(g);return g;
+  g.position.set(x,0,z);scene.add(g);
 }
 function mkRound(x,z,s){
   const g=new THREE.Group();
@@ -295,7 +298,7 @@ function mkRound(x,z,s){
   tr.position.y=0.9*s;tr.castShadow=true;g.add(tr);
   const cr=new THREE.Mesh(new THREE.SphereGeometry(1.2*s,8,6),new THREE.MeshLambertMaterial({color:0x6db85a}));
   cr.position.y=2.6*s;cr.castShadow=true;g.add(cr);
-  g.position.set(x,0,z);scene.add(g);return g;
+  g.position.set(x,0,z);scene.add(g);
 }
 
 // GLB Trees
@@ -305,55 +308,59 @@ let loadedTreeModel = null;
 const gltfLoader = new THREE.GLTFLoader();
 gltfLoader.load(TREE_URL,
   (gltf) => {
-    const m = gltf.scene;
-    m.traverse(c => { if(c.isMesh){c.castShadow=true;c.receiveShadow=true;} });
-    loadedTreeModel = m;
-    [{x:-4,z:-3,s:0.02},{x:-3,z:3,s:0.015},{x:4,z:3,s:0.018}].forEach(t => {
-      const tree = m.clone(); tree.position.set(t.x,0.15,t.z); tree.scale.setScalar(t.s); scene.add(tree);
+    const treeModel = gltf.scene;
+    treeModel.traverse(child => { if(child.isMesh){child.castShadow=true;child.receiveShadow=true;} });
+    loadedTreeModel = treeModel;
+    [{x:-4,z:-3,scale:0.02},{x:-3,z:3,scale:0.015},{x:4,z:3,scale:0.018}].forEach(t => {
+      const tree = treeModel.clone(); tree.position.set(t.x,0.15,t.z); tree.scale.setScalar(t.scale); scene.add(tree);
     });
     loadBar.style.width='100%';
     setTimeout(()=>document.getElementById('loading').classList.add('done'),300);
   },
   (p)=>{if(p.total)loadBar.style.width=(p.loaded/p.total*100)+'%';},
-  ()=>{mkPine(-4,-3,0.02);mkPine(-3,3,0.015);mkRound(4,3,0.018);loadBar.style.width='100%';setTimeout(()=>document.getElementById('loading').classList.add('done'),300);}
+  (err)=>{mkPine(-4,-3,0.02);mkPine(-3,3,0.015);mkRound(4,3,0.018);loadBar.style.width='100%';setTimeout(()=>document.getElementById('loading').classList.add('done'),300);}
 );
 
-// Flowers
+// Flowers (exact original)
 for(let i=0;i<5;i++){
   const fg=new THREE.Group();
-  fg.add(new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.4,4),new THREE.MeshLambertMaterial({color:0x6aaa55}))).position.y=0.2;
+  const st=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.4,4),new THREE.MeshLambertMaterial({color:0x6aaa55}));
+  st.position.y=0.2;fg.add(st);
   const cs=[0xf5a0b0,0xf0d060,0xffffff,0xc8a0f0];
-  fg.add(new THREE.Mesh(new THREE.SphereGeometry(0.12,6,4),new THREE.MeshLambertMaterial({color:cs[Math.floor(Math.random()*4)]}))).position.y=0.45;
+  const pt=new THREE.Mesh(new THREE.SphereGeometry(0.12,6,4),new THREE.MeshLambertMaterial({color:cs[Math.floor(Math.random()*4)]}));
+  pt.position.y=0.45;fg.add(pt);
   const a=Math.random()*Math.PI*2,dd=2+Math.random()*3;
   fg.position.set(Math.cos(a)*dd,0,Math.sin(a)*dd);scene.add(fg);
 }
 
-// Fence
-const fm=new THREE.MeshLambertMaterial({color:0xc4a46a});
+// Fence (exact original)
+const fenceM=new THREE.MeshLambertMaterial({color:0xc4a46a});
 [[-1,2],[1,2],[3,2],[3,0]].forEach(([x,z])=>{
-  const p=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.8,0.15),fm);
+  const p=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.8,0.15),fenceM);
   p.position.set(x,0.4,z);p.castShadow=true;scene.add(p);
 });
-const rm=new THREE.MeshLambertMaterial({color:0xb89858});
+const railM=new THREE.MeshLambertMaterial({color:0xb89858});
 [[[-1,2],[1,2]],[[1,2],[3,2]],[[3,2],[3,0]]].forEach(([[x1,z1],[x2,z2]])=>{
   const dx=x2-x1,dz=z2-z1,len=Math.sqrt(dx*dx+dz*dz);
-  const r=new THREE.Mesh(new THREE.BoxGeometry(len,0.08,0.08),rm);
+  const r=new THREE.Mesh(new THREE.BoxGeometry(len,0.08,0.08),railM);
   r.position.set((x1+x2)/2,0.55,(z1+z2)/2);r.rotation.y=Math.atan2(dz,dx);scene.add(r);
 });
 
-// ============ SHEEP ============
+// ============ CREATE SHEEP FUNCTION ============
 function createSheep(name, woolColor) {
   const sheep = new THREE.Group();
-  const sb = new THREE.Mesh(new THREE.SphereGeometry(0.55,8,6), new THREE.MeshLambertMaterial({color:woolColor}));
-  sb.position.y=0.7; sb.scale.set(1.1,0.9,0.85); sb.castShadow=true; sheep.add(sb);
-  sheep.bodyMesh = sb;
-  const sh = new THREE.Mesh(new THREE.SphereGeometry(0.3,8,6), new THREE.MeshLambertMaterial({color:0x3d3530}));
-  sh.position.set(0,0.9,0.5); sh.castShadow=true; sheep.add(sh);
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.55,8,6), new THREE.MeshLambertMaterial({color:woolColor}));
+  body.position.y=0.7; body.scale.set(1.1,0.9,0.85); body.castShadow=true; sheep.add(body);
+  sheep.bodyMesh = body;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.3,8,6), new THREE.MeshLambertMaterial({color:0x3d3530}));
+  head.position.set(0,0.9,0.5); head.castShadow=true; sheep.add(head);
   [[-0.12,0.95,0.72],[0.12,0.95,0.72]].forEach(p=>{
-    sheep.add(new THREE.Mesh(new THREE.SphereGeometry(0.06,6,4),new THREE.MeshLambertMaterial({color:0xffffff}))).position.set(...p);
+    const e=new THREE.Mesh(new THREE.SphereGeometry(0.06,6,4),new THREE.MeshLambertMaterial({color:0xffffff}));
+    e.position.set(...p); sheep.add(e);
   });
   [[-0.12,0.95,0.77],[0.12,0.95,0.77]].forEach(p=>{
-    sheep.add(new THREE.Mesh(new THREE.SphereGeometry(0.035,6,4),new THREE.MeshLambertMaterial({color:0x1a1a1a}))).position.set(...p);
+    const e=new THREE.Mesh(new THREE.SphereGeometry(0.035,6,4),new THREE.MeshLambertMaterial({color:0x1a1a1a}));
+    e.position.set(...p); sheep.add(e);
   });
   const sheepLegs=[];
   const lg=new THREE.CylinderGeometry(0.07,0.07,0.4,5),lm=new THREE.MeshLambertMaterial({color:0x3d3530});
@@ -375,7 +382,7 @@ function createSheep(name, woolColor) {
 }
 
 // ============ STATE ============
-let player, playerShadow, legs;
+let player, sb, ps, legs;
 const remotePlayers = {};
 let placedObjects = [];
 const placedObjectsMap = {};
@@ -387,7 +394,7 @@ let demolishMode = false;
 function placeTree(x,z){
   let obj;
   if(loadedTreeModel){obj=loadedTreeModel.clone();obj.position.set(x,0.15,z);obj.scale.setScalar(0.02);scene.add(obj);}
-  else{obj=mkPine(x,z,0.02);}
+  else{const g=new THREE.Group();mkPine(x,z,0.02);obj=g;}
   return obj;
 }
 function placeGrassTuft(x,z){
@@ -396,9 +403,11 @@ function placeGrassTuft(x,z){
 }
 function placeFlower(x,z){
   const fg=new THREE.Group();
-  fg.add(new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.4,4),new THREE.MeshLambertMaterial({color:0x6aaa55}))).position.y=0.2;
+  const st=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.4,4),new THREE.MeshLambertMaterial({color:0x6aaa55}));
+  st.position.y=0.2;fg.add(st);
   const cs=[0xf5a0b0,0xf0d060,0xffffff,0xc8a0f0];
-  fg.add(new THREE.Mesh(new THREE.SphereGeometry(0.12,6,4),new THREE.MeshLambertMaterial({color:cs[Math.floor(Math.random()*4)]}))).position.y=0.45;
+  const pt2=new THREE.Mesh(new THREE.SphereGeometry(0.12,6,4),new THREE.MeshLambertMaterial({color:cs[Math.floor(Math.random()*4)]}));
+  pt2.position.y=0.45;fg.add(pt2);
   fg.position.set(x,0,z);scene.add(fg);return fg;
 }
 function placeFencePost(x,z){
@@ -438,10 +447,9 @@ addEventListener('keydown',e=>{
 });
 renderer.domElement.addEventListener('contextmenu',e=>{e.preventDefault();cancelBuild();});
 
-// ============ MOVEMENT ============
-let targetPos=new THREE.Vector3(0,0,0),isMoving=false;
+// ============ MOVEMENT (exact original) ============
+let targetPos=new THREE.Vector3(0,0,2),isMoving=false;
 const ray=new THREE.Raycaster(),mss=new THREE.Vector2();
-
 renderer.domElement.addEventListener('click',e=>{
   if(isDrag)return;
   mss.x=(e.clientX/innerWidth)*2-1;mss.y=-(e.clientY/innerHeight)*2+1;
@@ -479,35 +487,29 @@ renderer.domElement.addEventListener('click',e=>{
   }
 });
 
-// ============ CAMERA ============
-let isDrag=false,pmx=0,pmy=0;
-let camAngle = Math.PI/4;   // horizontal orbit angle
-let camPitch = Math.PI/4;   // vertical angle (PI/4 = 45 degrees, nice isometric)
-let camDist = 20;            // distance from player
-
+// ============ CAMERA (exact original) ============
+let isDrag=false,pmx=0,pmy=0,camA=Math.PI/4,camP=0.5,camD=14;
 renderer.domElement.addEventListener('mousedown',e=>{isDrag=false;pmx=e.clientX;pmy=e.clientY;});
 renderer.domElement.addEventListener('mousemove',e=>{
   if(e.buttons!==1)return;
   const dx=e.clientX-pmx,dy=e.clientY-pmy;
   if(Math.abs(dx)>3||Math.abs(dy)>3)isDrag=true;
-  camAngle-=dx*0.005;
-  camPitch=Math.max(0.15,Math.min(Math.PI/2-0.05,camPitch+dy*0.005));
+  camA-=dx*0.005;camP=Math.max(0.2,Math.min(1.2,camP+dy*0.005));
   pmx=e.clientX;pmy=e.clientY;
 });
-renderer.domElement.addEventListener('wheel',e=>{camDist=Math.max(8,Math.min(35,camDist+e.deltaY*0.02));});
+renderer.domElement.addEventListener('wheel',e=>{camD=Math.max(6,Math.min(22,camD+e.deltaY*0.02));});
 renderer.domElement.addEventListener('touchstart',e=>{if(e.touches.length===1){pmx=e.touches[0].clientX;pmy=e.touches[0].clientY;isDrag=false;}});
 renderer.domElement.addEventListener('touchmove',e=>{
   if(e.touches.length===1){
     const dx=e.touches[0].clientX-pmx,dy=e.touches[0].clientY-pmy;
     if(Math.abs(dx)>3||Math.abs(dy)>3)isDrag=true;
-    camAngle-=dx*0.005;
-    camPitch=Math.max(0.15,Math.min(Math.PI/2-0.05,camPitch+dy*0.005));
+    camA-=dx*0.005;camP=Math.max(0.2,Math.min(1.2,camP+dy*0.005));
     pmx=e.touches[0].clientX;pmy=e.touches[0].clientY;
   }
   e.preventDefault();
 },{passive:false});
 
-// ============ CHAT ============
+// ============ CHAT (Firebase) ============
 const ci=document.getElementById('chat-input'),cm=document.getElementById('chat-messages');
 function sendMsg(){
   const m=ci.value.trim();if(!m)return;
@@ -520,17 +522,22 @@ function escapeHTML(s){const d=document.createElement('div');d.textContent=s;ret
 
 // ============ INIT GAME ============
 function initGame(){
-  player=createSheep(localPlayerName,0xf5f0e8);
-  player.position.set(0,0,0);scene.add(player);
-  legs=player.legs;
-  playerShadow=player.shadowMesh;
-  playerShadow.position.set(0,0.16,0);scene.add(playerShadow);
+  // Create local player
+  player = createSheep(localPlayerName, 0xf5f0e8);
+  player.position.set(0,0,2);
+  scene.add(player);
+  sb = player.bodyMesh;
+  legs = player.legs;
+  ps = player.shadowMesh;
+  ps.position.set(0,0.16,2);
+  scene.add(ps);
 
-  const playerRef=db.ref('players/'+localPlayerId);
-  playerRef.set({name:localPlayerName,x:0,z:0,rot:0});
+  // Register with Firebase
+  const playerRef = db.ref('players/'+localPlayerId);
+  playerRef.set({name:localPlayerName,x:0,z:2,rot:0});
   playerRef.onDisconnect().remove();
 
-  // Players
+  // Listen for other players
   db.ref('players').on('child_added',snap=>{
     const id=snap.key;if(id===localPlayerId)return;
     const data=snap.val();
@@ -551,7 +558,7 @@ function initGame(){
     if(remotePlayers[id]){scene.remove(remotePlayers[id].group);scene.remove(remotePlayers[id].shadow);delete remotePlayers[id];updatePlayerCount();}
   });
 
-  // Chat
+  // Chat listener
   db.ref('chat').orderByChild('time').limitToLast(50).on('child_added',snap=>{
     const data=snap.val();const d=document.createElement('div');d.style.marginTop='6px';
     const color=data.name===localPlayerName?'#7ecd6a':'#6ab8e0';
@@ -559,7 +566,7 @@ function initGame(){
     cm.appendChild(d);cm.scrollTop=cm.scrollHeight;
   });
 
-  // Objects
+  // Objects listener
   db.ref('objects').on('child_added',snap=>{
     const data=snap.val(),key=snap.key;
     if(buildFactories[data.type]){const obj=buildFactories[data.type](data.x,data.z);placedObjects.push(obj);placedObjectsMap[key]=obj;}
@@ -577,17 +584,17 @@ function updatePlayerCount(){
   document.getElementById('player-count').textContent=count+(count===1?' Player':' Players');
 }
 
-// ============ SYNC ============
+// Sync position (throttled)
 let lastSyncTime=0;
 function syncPosition(){
   const now=Date.now();if(now-lastSyncTime<100)return;lastSyncTime=now;
   db.ref('players/'+localPlayerId).update({x:player.position.x,z:player.position.z,rot:player.rotation.y});
 }
 
-// ============ ANIMATE ============
+// ============ ANIMATE (exact original camera math) ============
 let t=0;
 function animate(){
-  requestAnimationFrame(animate);t+=0.016;
+  requestAnimationFrame(animate); t+=0.016;
   if(isMoving){
     const dx=targetPos.x-player.position.x,dz=targetPos.z-player.position.z;
     if(Math.sqrt(dx*dx+dz*dz)>0.1){
@@ -597,9 +604,10 @@ function animate(){
       legs.forEach((l,i)=>l.rotation.x=Math.sin(t*10+i*Math.PI)*0.3);
       syncPosition();
     }else{isMoving=false;player.position.y=0;legs.forEach(l=>l.rotation.x=0);syncPosition();}
-  }else{if(player)player.bodyMesh.scale.y=0.9+Math.sin(t*2)*0.02;}
-  if(playerShadow){playerShadow.position.x=player.position.x;playerShadow.position.z=player.position.z;}
+  }else{if(sb)sb.scale.y=0.9+Math.sin(t*2)*0.02;}
+  if(ps){ps.position.x=player.position.x;ps.position.z=player.position.z;}
 
+  // Remote players
   for(const id in remotePlayers){
     const rp=remotePlayers[id],g=rp.group;
     const dx=rp.targetX-g.position.x,dz=rp.targetZ-g.position.z;
@@ -607,19 +615,17 @@ function animate(){
       g.position.x+=dx*0.08;g.position.z+=dz*0.08;
       g.position.y=Math.abs(Math.sin(t*8))*0.08;
       rp.legs.forEach((l,i)=>l.rotation.x=Math.sin(t*10+i*Math.PI)*0.3);
-    }else{g.position.y=0;rp.legs.forEach(l=>l.rotation.x=0);rp.bodyMesh.scale.y=0.9+Math.sin(t*2)*0.02;}
+    }else{g.position.y=0;rp.legs.forEach(l=>l.rotation.x=0);if(rp.bodyMesh)rp.bodyMesh.scale.y=0.9+Math.sin(t*2)*0.02;}
     g.rotation.y+=(rp.targetRot-g.rotation.y)*0.1;
     rp.shadow.position.x=g.position.x;rp.shadow.position.z=g.position.z;
   }
 
-  if(player){
-    // Orbital camera: spherical coordinates around player
-    const targetX = player.position.x + Math.sin(camAngle) * Math.cos(camPitch) * camDist;
-    const targetY = Math.sin(camPitch) * camDist;
-    const targetZ = player.position.z + Math.cos(camAngle) * Math.cos(camPitch) * camDist;
-    camera.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), 0.08);
-    camera.lookAt(new THREE.Vector3(player.position.x, 0.5, player.position.z));
-  }
+  // Camera (EXACT original math)
+  const cx=player.position.x+Math.sin(camA)*camD*Math.cos(camP);
+  const cy=Math.sin(camP)*camD;
+  const cz=player.position.z+Math.cos(camA)*camD*Math.cos(camP);
+  camera.position.lerp(new THREE.Vector3(cx,cy,cz),0.05);
+  camera.lookAt(new THREE.Vector3(player.position.x,1,player.position.z));
   renderer.render(scene,camera);
 }
 
